@@ -1,7 +1,15 @@
 #include "Model.h"
 
+#ifdef _DEBUG
+#include <iostream>
+#endif
+
 Model::Model(RTCDevice device)
 {
+#ifdef _DEBUG
+	std::cout << "Created Model" << std::endl;
+#endif
+
 	Geometry = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
 
 	VertexBuffer = (float*)rtcSetNewGeometryBuffer(Geometry, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 3 * sizeof(float), 3);
@@ -18,6 +26,10 @@ Model::Model(RTCDevice device)
 Model::~Model()
 {
 	rtcReleaseGeometry(Geometry);
+
+#if _DEBUG
+	std::cout << "Delete Model" << std::endl;
+#endif
 }
 
 RTCGeometry Model::GetGeometry()

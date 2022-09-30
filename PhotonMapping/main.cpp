@@ -2,19 +2,19 @@
 #include <limits>
 #include <iostream>
 
+#include "Scene.h"
 #include "Model.h"
 
 int main()
 {
 	RTCDevice device = rtcNewDevice(nullptr);
-	RTCScene scene = rtcNewScene(device);
 
-	std::shared_ptr<Model> Triangle = std::make_shared<Model>(device);
+	Scene Scene(device);
 
-	rtcAttachGeometry(scene, Triangle->GetGeometry());
-	Triangle.reset();
+	std::unique_ptr<Model> Triangle = std::make_unique<Model>(device);
+	Scene.AttachModel(std::move(Triangle));
 
-	rtcCommitScene(scene);
+	Scene.Commit();
 
 	RTCRayHit rayhit;
 	rayhit.ray.org_x = 0.f; rayhit.ray.org_y = 0.f; rayhit.ray.org_z = -3.f;
@@ -26,7 +26,7 @@ int main()
 	RTCIntersectContext context;
 	rtcInitIntersectContext(&context);
 
-	rtcIntersect1(scene, &context, &rayhit);
+	rtcIntersect1(Scene.GetScene(), &context, &rayhit);
 
 	if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
 		std::cout << "Intersection at t = " << rayhit.ray.tfar << std::endl;
@@ -36,6 +36,5 @@ int main()
 		std::cout << "No intersection." << std::endl;
 	}
 
-	rtcReleaseScene(scene);
 	rtcReleaseDevice(device);
 }
