@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PhotonMapping", "PhotonMapping.vcxproj", "{B1117DA9-D518-4D17-AFB6-7CF3E80A36CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B1117DA9-D518-4D17-AFB6-7CF3E80A36CB}.Debug|x64.ActiveCfg = Debug|x64
+		{B1117DA9-D518-4D17-AFB6-7CF3E80A36CB}.Debug|x64.Build.0 = Debug|x64
+		{B1117DA9-D518-4D17-AFB6-7CF3E80A36CB}.Release|x64.ActiveCfg = Release|x64
+		{B1117DA9-D518-4D17-AFB6-7CF3E80A36CB}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0084940D-672A-498B-A1B6-19BA150C5485}
+	EndGlobalSection
+EndGlobal
