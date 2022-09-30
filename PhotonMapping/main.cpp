@@ -2,24 +2,18 @@
 #include <limits>
 #include <iostream>
 
+#include "Model.h"
+
 int main()
 {
 	RTCDevice device = rtcNewDevice(nullptr);
 	RTCScene scene = rtcNewScene(device);
 
-	RTCGeometry geometry = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
+	std::shared_ptr<Model> Triangle = std::make_shared<Model>(device);
 
-	float* vb = (float*)rtcSetNewGeometryBuffer(geometry, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 3 * sizeof(float), 3);
-	vb[0] = 0.f; vb[1] = 0.f; vb[2] = 0.f;
-	vb[3] = 1.f; vb[4] = 0.f; vb[5] = 0.f;
-	vb[6] = 0.f; vb[7] = 1.f; vb[8] = 0.f;
+	rtcAttachGeometry(scene, Triangle->GetGeometry());
+	Triangle.reset();
 
-	unsigned* ib = (unsigned*)rtcSetNewGeometryBuffer(geometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, 3 * sizeof(unsigned), 1);
-	ib[0] = 0; ib[1] = 1; ib[2] = 2;
-
-	rtcCommitGeometry(geometry);
-	rtcAttachGeometry(scene, geometry);
-	rtcReleaseGeometry(geometry);
 	rtcCommitScene(scene);
 
 	RTCRayHit rayhit;
