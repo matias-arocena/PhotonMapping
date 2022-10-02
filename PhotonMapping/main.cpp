@@ -4,6 +4,7 @@
 
 #include "Scene.h"
 #include "Model.h"
+#include "Ray.h"
 
 int main()
 {
@@ -18,27 +19,18 @@ int main()
 
 	Scene.Commit();
 
-	RTCRayHit rayhit;
-	rayhit.ray.org_x = 0.f; rayhit.ray.org_y = 0.f; rayhit.ray.org_z = -3.f;
-	rayhit.ray.dir_x = 0.f; rayhit.ray.dir_y = 0.f; rayhit.ray.dir_z = 1.f;
-	rayhit.ray.tnear = 0.f;
-	rayhit.ray.tfar = std::numeric_limits<float>::infinity();
-	rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
+	Ray FirstRay(glm::vec3{ 0.0f, 0.0f, -3.0f }, glm::vec3{ 0.0f, 0.0f, 1.f });
 
+	Scene.ThrowRay(FirstRay);
 
-
-	RTCIntersectContext context;
-	rtcInitIntersectContext(&context);
-
-	rtcIntersect1(Scene.GetScene(), &context, &rayhit);
-
-	if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
-		
-		std::cout << "Intersection at t = " << rayhit.ray.tfar << std::endl;
+	glm::vec3 HitCoordinates;
+	if (FirstRay.GetHit(HitCoordinates))
+	{
+		std::cout << HitCoordinates.x << "," << HitCoordinates.y << "," << HitCoordinates.z << std::endl;
 	}
 	else
 	{
-		std::cout << "No intersection." << std::endl;
+		std::cout << "No hit" << std::endl;
 	}
 
 	rtcReleaseDevice(device);

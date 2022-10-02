@@ -1,6 +1,7 @@
 #include "Scene.h"
 
 #include "Model.h"
+#include "Ray.h"
 
 #ifdef _DEBUG
 #include <iostream>
@@ -13,6 +14,7 @@ Scene::Scene(RTCDevice device)
 #endif
 
 	TheScene = rtcNewScene(device);
+	rtcInitIntersectContext(&context);
 }
 
 Scene::~Scene()
@@ -40,4 +42,8 @@ void Scene::Commit()
 	rtcCommitScene(TheScene);
 }
 
+void Scene::ThrowRay(Ray& Ray)
+{
+	rtcIntersect1(TheScene, &context, Ray.GetRayHit());
+}
 
