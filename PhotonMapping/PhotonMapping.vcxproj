@@ -133,7 +133,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)ThirdParty\libs\embree3.lib;$(ProjectDir)ThirdParty\libs\tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)ThirdParty\libs\embree3.lib;$(ProjectDir)ThirdParty\libs\tbb.lib;$(ProjectDir)ThirdParty\libs\FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)ThirdParty\dlls\*" "$(TargetDir)"</Command>

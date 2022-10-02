@@ -1,3 +1,4 @@
+#pragma once
 #include <glm/glm.hpp>
 #include <embree3/rtcore.h>
 
@@ -7,12 +8,12 @@ public:
 	~Ray();
 	bool GetHit(glm::vec3& OutHitCoordinates); 
 	RTCRayHit* GetRayHit();
+	glm::vec3 Origin;
+	glm::vec3 Direction;
 
 private:
 	RTCRayHit* RayHit;
 
-	glm::vec3 Origin;
-	glm::vec3 Direction;
 };
 
 

@@ -6,12 +6,10 @@ class Light
 {
 
 private:
-	glm::vec3 position;
 	float intensity;
 	
 
 public:
-	Light(glm::vec3 position, float intensity);
-	glm::vec3 getPosition();
+	Light(float intensity);
 	float getIntensity();
 };
