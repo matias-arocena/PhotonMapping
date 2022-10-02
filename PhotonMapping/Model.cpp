@@ -29,17 +29,23 @@ void Model::loadModel(const char* objFilePath, RTCDevice device)
 
 void Model::processNode(aiNode* node, const aiScene* scene, RTCDevice device)
 {
+
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
-        Mesh newMesh = Mesh(mesh, scene, device);
-        std::shared_ptr<Mesh> meshPtr = std::make_shared<Mesh>(newMesh);
-        meshes.push_back(meshPtr);
+        std::shared_ptr<Mesh> meshPtr = std::make_shared<Mesh>(mesh, scene, device);
+        this->meshes.push_back(meshPtr);
+    }
+    // then do the same for each of its children
+    for (unsigned int i = 0; i < node->mNumChildren; i++)
+    {
+        processNode(node->mChildren[i], scene, device);
     }
 }
 
 std::vector<std::shared_ptr<Mesh>> Model::getMeshes()
 {
+
     return this->meshes;
 }
