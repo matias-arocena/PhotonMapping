@@ -1,38 +1,45 @@
 #include "Model.h"
-
-#ifdef _DEBUG
+#include "Mesh.h"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 #include <iostream>
-#endif
 
-Model::Model(RTCDevice device)
+Model::Model(const char* objFilePath, RTCDevice device)
 {
-#ifdef _DEBUG
-	std::cout << "Created Model" << std::endl;
-#endif
-
-	Geometry = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
-
-	VertexBuffer = (float*)rtcSetNewGeometryBuffer(Geometry, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 3 * sizeof(float), 3);
-	VertexBuffer[0] = 0.f; VertexBuffer[1] = 0.f; VertexBuffer[2] = 0.f;
-	VertexBuffer[3] = 1.f; VertexBuffer[4] = 0.f; VertexBuffer[5] = 0.f;
-	VertexBuffer[6] = 0.f; VertexBuffer[7] = 1.f; VertexBuffer[8] = 0.f;
-
-	IndexBuffer = (unsigned*)rtcSetNewGeometryBuffer(Geometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, 3 * sizeof(unsigned), 1);
-	IndexBuffer[0] = 0; IndexBuffer[1] = 1; IndexBuffer[2] = 2;
-
-	rtcCommitGeometry(Geometry);
+    this->meshes = std::vector<std::shared_ptr<Mesh>>();
+    this->loadModel(objFilePath, device);
 }
 
-Model::~Model()
+void Model::loadModel(const char* objFilePath, RTCDevice device)
 {
-	rtcReleaseGeometry(Geometry);
+    Assimp::Importer import;
 
-#if _DEBUG
-	std::cout << "Delete Model" << std::endl;
-#endif
+    std::cout << objFilePath << std::endl;
+    const aiScene* scene = import.ReadFile(objFilePath, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    {
+        std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
+        return;
+    }
+
+    processNode(scene->mRootNode, scene, device);
 }
 
-RTCGeometry Model::GetGeometry()
+void Model::processNode(aiNode* node, const aiScene* scene, RTCDevice device)
 {
-	return Geometry;
+    for (unsigned int i = 0; i < node->mNumMeshes; i++)
+    {
+        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+
+        Mesh newMesh = Mesh(mesh, scene, device);
+        std::shared_ptr<Mesh> meshPtr = std::make_shared<Mesh>(newMesh);
+        meshes.push_back(meshPtr);
+    }
+}
+
+std::vector<std::shared_ptr<Mesh>> Model::getMeshes()
+{
+    return this->meshes;
 }

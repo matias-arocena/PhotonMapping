@@ -1,8 +1,8 @@
 #pragma once
 #include <embree3/rtcore.h>
 #include <memory>
-
-class Model;
+#include <vector>
+#include "Model.h"
 
 class Scene
 {
@@ -12,12 +12,12 @@ public:
 
 	RTCScene GetScene();
 
-	void AttachModel(std::unique_ptr<Model> Model);
+	void AttachModel(std::shared_ptr<Model> model);
 	void Commit();
 private:
 	RTCScene TheScene;
 
-	std::vector<std::unique_ptr<Model>> Models;
+	std::vector<std::shared_ptr<Model>> Models;
 
 };
 

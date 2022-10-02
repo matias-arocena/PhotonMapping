@@ -1,17 +1,25 @@
 #pragma once
-#include <embree3/rtcore.h>
+#include <vector>
+#include "Mesh.h"
+#include <memory>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <iostream>
 
 class Model
 {
 public:
-	Model(RTCDevice device);
-	~Model();
 
-	RTCGeometry GetGeometry();
+	Model(const char* objFilePath, RTCDevice device);
+
+	std::vector<std::shared_ptr<Mesh>> getMeshes();
 
 private:
-	RTCGeometry Geometry;
-	float* VertexBuffer;
-	unsigned* IndexBuffer;
+	std::vector<std::shared_ptr<Mesh>> meshes;
+
+	void processNode(aiNode* node, const aiScene* scene, RTCDevice device);
+
+	void loadModel(const char* objFilePath, RTCDevice device);
+
 };
 

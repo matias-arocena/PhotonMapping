@@ -4,7 +4,7 @@
 
 #include "Scene.h"
 #include "Model.h"
-
+#include <assimp/importer.hpp>
 int main()
 {
 	const int image_width = 1024, image_height = 12;
@@ -13,7 +13,9 @@ int main()
 
 	Scene Scene(device);
 
-	std::unique_ptr<Model> Triangle = std::make_unique<Model>(device);
+	const char* objFilePath = "untitled.obj";
+	std::shared_ptr<Model> Triangle = std::make_shared<Model>(objFilePath, device);
+
 	Scene.AttachModel(std::move(Triangle));
 
 	Scene.Commit();
@@ -26,7 +28,7 @@ int main()
 	rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
 
 
-
+	
 	RTCIntersectContext context;
 	rtcInitIntersectContext(&context);
 

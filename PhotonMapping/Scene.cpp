@@ -30,9 +30,14 @@ RTCScene Scene::GetScene()
 	return TheScene;
 }
 
-void Scene::AttachModel(std::unique_ptr<Model> Model)
+void Scene::AttachModel(std::shared_ptr<Model> model)
 {
-	rtcAttachGeometry(TheScene, Model->GetGeometry());
+	std::vector<std::shared_ptr<Mesh>> meshes = model->getMeshes();
+	for ( std::shared_ptr<Mesh> mesh : meshes)
+	{
+		rtcAttachGeometry(TheScene, mesh->GetGeometry());
+	}
+	
 }
 
 void Scene::Commit()
