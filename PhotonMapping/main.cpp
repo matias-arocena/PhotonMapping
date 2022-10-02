@@ -8,8 +8,7 @@
 #include "Model.h"
 #include "Ray.h"
 #include "Settings.h"
-
-
+#include "Loader.h"
 
 
 int main()
@@ -17,12 +16,14 @@ int main()
 
 	RTCDevice device = rtcNewDevice(nullptr);
 
-	Scene Scene(device);
+	std::shared_ptr<Scene> scene = std::make_shared<Scene>(device);
+
+	importScene(scene);
 
 	std::unique_ptr<Model> Triangle = std::make_unique<Model>(device);
-	Scene.AttachModel(std::move(Triangle));
+	scene->AttachModel(std::move(Triangle));
 
-	Scene.Commit();
+	scene->Commit();
 
 	Ray FirstRay(glm::vec3{ 0.0f, 0.0f, -3.0f }, glm::vec3{ 0.0f, 0.0f, 1.f });
 
@@ -33,14 +34,14 @@ int main()
 
 	for (Ray camRay : camRays)
 	{
-		Scene.ThrowRay(camRay);
+		scene->ThrowRay(camRay);
 
 		glm::vec3 HitCoordinates;
 
 		if (camRay.GetHit(HitCoordinates))
 		{
 			buffer.push_back(glm::vec3{ 255,255,255 });
-			std::cout << HitCoordinates.x << "," << HitCoordinates.y << "," << HitCoordinates.z << std::endl;
+			//std::cout << HitCoordinates.x << "," << HitCoordinates.y << "," << HitCoordinates.z << std::endl;
 		}
 		else
 		{
@@ -48,6 +49,8 @@ int main()
 			//std::cout << "No hit" << std::endl;
 		}
 	}
+
+	scene->saveImage(buffer);
 
 	rtcReleaseDevice(device);
 }

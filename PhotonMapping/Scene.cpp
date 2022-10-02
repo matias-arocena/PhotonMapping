@@ -11,7 +11,27 @@
 
 
 
-void saveImage(std::vector<glm::vec3> buffer, std::string path)
+Scene::Scene(RTCDevice device)
+{
+#ifdef _DEBUG
+	std::cout << "Created Scene" << std::endl;
+#endif
+
+	TheScene = rtcNewScene(device);
+	rtcInitIntersectContext(&context);
+}
+
+Scene::~Scene()
+{
+	rtcReleaseScene(TheScene);
+
+#ifdef _DEBUG
+	std::cout << "Deleted Scene" << std::endl;
+#endif
+
+}
+
+void Scene::saveImage(std::vector<glm::vec3> buffer)
 {
     FreeImage_Initialise();
     FIBITMAP* bitmap = FreeImage_Allocate(Settings::width, Settings::height, 24);
@@ -34,26 +54,6 @@ void saveImage(std::vector<glm::vec3> buffer, std::string path)
     FreeImage_DeInitialise();
 }
 
-Scene::Scene(RTCDevice device)
-{
-#ifdef _DEBUG
-	std::cout << "Created Scene" << std::endl;
-#endif
-
-	TheScene = rtcNewScene(device);
-	rtcInitIntersectContext(&context);
-}
-
-Scene::~Scene()
-{
-	rtcReleaseScene(TheScene);
-
-#ifdef _DEBUG
-	std::cout << "Deleted Scene" << std::endl;
-#endif
-
-}
-
 RTCScene Scene::GetScene()
 {
 	return TheScene;
@@ -72,5 +72,15 @@ void Scene::Commit()
 void Scene::ThrowRay(Ray& Ray)
 {
 	rtcIntersect1(TheScene, &context, Ray.GetRayHit());
+}
+
+void Scene::addLight(std::shared_ptr<Light> light)
+{
+    Lights.push_back(light);
+}
+
+void Scene::setCamera(std::shared_ptr<Camera> camera)
+{
+    this->camera = camera;
 }
 

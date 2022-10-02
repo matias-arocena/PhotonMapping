@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Scene resx="1920" resy="1080" maxDepth="8" bgColorR="0" bgColorG="0" bgColorB="0" fov="120">
+    <Models>
+    </Models>
+    <Lights>
+        <PointLight x="9.9" y="4.9" z="4.9" intensity="5"/>
+        <PointLight x="-4.9" y="4.9" z="4.9" intensity="5"/>
+        <PointLight x="9.9" y="-4.9" z="4.9" intensity="5"/>
+        <PointLight x="-4.9" y="-4.9" z="4.9" intensity="5"/>
+        <PointLight x="9.9" y="4.9" z="-0.9" intensity="5"/>
+		<PointLight x="-4.9" y="4.9" z="-0.9" intensity="5"/>
+		<PointLight x="9.9" y="-4.9" z="-0.9" intensity="5"/>
+		<PointLight x="-4.9" y="-4.9" z="-0.9" intensity="5"/>
+    </Lights>
+    <Camera x="-5" y="0" z="3" upx="0" upy="0" upz="1" dirx="1" diry="0" dirz="0"/>
+</Scene>
