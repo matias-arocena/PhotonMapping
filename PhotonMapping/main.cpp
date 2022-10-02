@@ -7,6 +7,8 @@
 
 int main()
 {
+	const int image_width = 1024, image_height = 12;
+
 	RTCDevice device = rtcNewDevice(nullptr);
 
 	Scene Scene(device);
@@ -23,12 +25,15 @@ int main()
 	rayhit.ray.tfar = std::numeric_limits<float>::infinity();
 	rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
 
+
+
 	RTCIntersectContext context;
 	rtcInitIntersectContext(&context);
 
 	rtcIntersect1(Scene.GetScene(), &context, &rayhit);
 
 	if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
+		
 		std::cout << "Intersection at t = " << rayhit.ray.tfar << std::endl;
 	}
 	else

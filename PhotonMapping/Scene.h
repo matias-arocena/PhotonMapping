@@ -17,5 +17,7 @@ public:
 private:
 	RTCScene TheScene;
 
+	std::vector<std::unique_ptr<Model>> Models;
+
 };
 
