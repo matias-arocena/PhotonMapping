@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <utility>
+#include <vector>
 
 class Camera
 {
@@ -20,4 +21,6 @@ public:
 		glm::vec3 rightVector;
 	};
 	SecreenBase screenBaseVectors();
+
+	std::vector<glm::vec3> generateRaysCamera();
 };
