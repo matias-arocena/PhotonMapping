@@ -8,31 +8,10 @@
 #include "Model.h"
 #include "Ray.h"
 #include "Settings.h"
+#include "Loader.h"
 #include <assimp/importer.hpp>
 
 
-void saveImage(std::vector<glm::vec3> buffer, std::string path)
-{
-	FreeImage_Initialise();
-	FIBITMAP* bitmap = FreeImage_Allocate(Settings::width, Settings::height, 24);
-	RGBQUAD color;
-	for (int j = 0; j < Settings::height; j++)
-	{
-		for (int i = 0; i < Settings::width; ++i)
-		{
-			color.rgbRed = (buffer)[(j * Settings::width) + i].r;
-			color.rgbBlue = (buffer)[(j * Settings::width) + i].b;
-			color.rgbGreen = (buffer)[(j * Settings::width) + i].g;
-			FreeImage_SetPixelColor(bitmap, i, j, &color);
-		}
-	}
-
-	if (FreeImage_Save(FIF_PNG, bitmap, "imagen_prueba1.png", 0))
-	{
-		std::cout << "Image " << "imagen_prueba1.png" << " saved" << std::endl;
-	}
-	FreeImage_DeInitialise();
-}
 
 
 int main()
@@ -40,14 +19,16 @@ int main()
 
 	RTCDevice device = rtcNewDevice(nullptr);
 
-	Scene Scene(device);
+	std::shared_ptr<Scene> scene = std::make_shared<Scene>(device);
+
+	importScene(scene);
 
 	const char* objFilePath = "untitled.obj";
 	std::shared_ptr<Model> Triangle = std::make_shared<Model>(objFilePath, device);
 
-	Scene.AttachModel(std::move(Triangle));
+	scene->AttachModel(std::move(Triangle));
 
-	Scene.Commit();
+	scene->Commit();
 
 	Ray FirstRay(glm::vec3{ 0.0f, 0.0f, -3.0f }, glm::vec3{ 0.0f, 0.0f, 1.f });
 
@@ -58,14 +39,14 @@ int main()
 
 	for (Ray camRay : camRays)
 	{
-		Scene.ThrowRay(camRay);
+		scene->ThrowRay(camRay);
 
 		glm::vec3 HitCoordinates;
 
 		if (camRay.GetHit(HitCoordinates))
 		{
 			buffer.push_back(glm::vec3{ 255,255,255 });
-			std::cout << HitCoordinates.x << "," << HitCoordinates.y << "," << HitCoordinates.z << std::endl;
+			//std::cout << HitCoordinates.x << "," << HitCoordinates.y << "," << HitCoordinates.z << std::endl;
 		}
 		else
 		{
@@ -74,7 +55,7 @@ int main()
 		}
 	}
 
-	saveImage(buffer, "xd.bmp");
+	scene->saveImage(buffer);
 
 	rtcReleaseDevice(device);
 }
