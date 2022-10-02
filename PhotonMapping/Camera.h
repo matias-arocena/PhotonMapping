@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <utility>
 #include <vector>
+#include "Ray.h"
 
 class Camera
 {
@@ -22,5 +23,5 @@ public:
 	};
 	SecreenBase screenBaseVectors();
 
-	std::vector<glm::vec3> generateRaysCamera();
+	std::vector<Ray> generateRaysCamera();
 };
