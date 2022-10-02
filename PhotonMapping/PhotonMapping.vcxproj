@@ -133,7 +133,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)ThirdParty\libs\assimp-vc143-mt.lib;$(ProjectDir)ThirdParty\libs\embree3.lib;$(ProjectDir)ThirdParty\libs\tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty\libs\assimp-vc143-mt.lib;$(ProjectDir)ThirdParty\libs\embree3.lib;$(ProjectDir)ThirdParty\libs\tbb.lib;$(ProjectDir)ThirdParty\libs\FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)ThirdParty\dlls\*" "$(TargetDir)"</Command>
@@ -160,15 +160,28 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Light.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Ray.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Settings.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

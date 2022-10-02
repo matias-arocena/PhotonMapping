@@ -1,13 +1,19 @@
 #include <embree3/rtcore.h>
 #include <limits>
 #include <iostream>
+#include <FreeImage.h>
 
+#include "Camera.h"
 #include "Scene.h"
 #include "Model.h"
+#include "Ray.h"
+#include "Settings.h"
 #include <assimp/importer.hpp>
+
+
+
 int main()
 {
-	const int image_width = 1024, image_height = 12;
 
 	RTCDevice device = rtcNewDevice(nullptr);
 
@@ -20,27 +26,29 @@ int main()
 
 	Scene.Commit();
 
-	RTCRayHit rayhit;
-	rayhit.ray.org_x = 0.f; rayhit.ray.org_y = 0.f; rayhit.ray.org_z = -3.f;
-	rayhit.ray.dir_x = 0.f; rayhit.ray.dir_y = 0.f; rayhit.ray.dir_z = 1.f;
-	rayhit.ray.tnear = 0.f;
-	rayhit.ray.tfar = std::numeric_limits<float>::infinity();
-	rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
+	Ray FirstRay(glm::vec3{ 0.0f, 0.0f, -3.0f }, glm::vec3{ 0.0f, 0.0f, 1.f });
 
+	Camera camera(glm::vec3(0.0f, 0.0f, -3.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3( 0.0f, 1.0f, 0.0f));
 
-	
-	RTCIntersectContext context;
-	rtcInitIntersectContext(&context);
+	std::vector<Ray> camRays = camera.generateRaysCamera();
+	std::vector<glm::vec3> buffer;
 
-	rtcIntersect1(Scene.GetScene(), &context, &rayhit);
-
-	if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
-		
-		std::cout << "Intersection at t = " << rayhit.ray.tfar << std::endl;
-	}
-	else
+	for (Ray camRay : camRays)
 	{
-		std::cout << "No intersection." << std::endl;
+		Scene.ThrowRay(camRay);
+
+		glm::vec3 HitCoordinates;
+
+		if (camRay.GetHit(HitCoordinates))
+		{
+			buffer.push_back(glm::vec3{ 255,255,255 });
+			std::cout << HitCoordinates.x << "," << HitCoordinates.y << "," << HitCoordinates.z << std::endl;
+		}
+		else
+		{
+			buffer.push_back(glm::vec3{ 0,0,0 });
+			//std::cout << "No hit" << std::endl;
+		}
 	}
 
 	rtcReleaseDevice(device);
