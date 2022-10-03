@@ -2,13 +2,13 @@
 #include <embree3/rtcore.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
+#include <glm/glm.hpp>
 #include <memory>
 
 class Mesh
 {
 public:
-	Mesh(aiMesh* mesh, const aiScene* scene, RTCDevice device);
+	Mesh(aiMesh* mesh, const aiScene* scene, RTCDevice device, glm::vec3 position);
 
 	~Mesh();
 

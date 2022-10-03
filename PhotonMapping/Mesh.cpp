@@ -4,7 +4,7 @@
 #include <iostream>
 #endif
 
-Mesh::Mesh(aiMesh* mesh, const aiScene* scene, RTCDevice device)
+Mesh::Mesh(aiMesh* mesh, const aiScene* scene, RTCDevice device, glm::vec3 position)
 {
 #ifdef _DEBUG
 	std::cout << "Created Mesh" << std::endl;
@@ -17,9 +17,9 @@ Mesh::Mesh(aiMesh* mesh, const aiScene* scene, RTCDevice device)
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
-		this->VertexBuffer[i * 3] = mesh->mVertices[i].x;
-		this->VertexBuffer[i * 3 + 1] = mesh->mVertices[i].y;
-		this->VertexBuffer[i * 3 + 2] = mesh->mVertices[i].z;
+		this->VertexBuffer[i * 3] = mesh->mVertices[i].x + position.x;
+		this->VertexBuffer[i * 3 + 1] = mesh->mVertices[i].y + position.y;
+		this->VertexBuffer[i * 3 + 2] = mesh->mVertices[i].z + position.z;
 	}
 
 	// Asumo que mesh siempre tiene triángulos

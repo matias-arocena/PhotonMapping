@@ -14,15 +14,16 @@ void importModels(pugi::xml_node node, std::shared_ptr<Scene> scene)
 	{
 		std::string objType = obj.name();
 
-		if (objType.compare("Model"))
+		if (objType.compare("Model") == 0)
 		{
-			float xPos = obj.attribute("x").as_float();
-			float yPos = obj.attribute("y").as_float();
-			float zPos = obj.attribute("z").as_float();
+			glm::vec3 position(0, 0, 0);
+			position.x = obj.attribute("x").as_float();
+			position.y = obj.attribute("y").as_float();
+			position.z = obj.attribute("z").as_float();
 
 			std::string objRoute = obj.attribute("objRoute").as_string();
 
-			//pasarle el path a model y agregarlo a la scena
+			scene->addModel(objRoute, position);
 		}
 	}
 }

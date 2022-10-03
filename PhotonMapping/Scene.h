@@ -24,12 +24,15 @@ public:
 	void addLight(std::shared_ptr<Light> light);
 	void setCamera(std::shared_ptr<Camera> camera);
 	void saveImage(std::vector<glm::vec3> buffer);
+	void addModel(std::string objRoute, glm::vec3 position);
+
+	std::shared_ptr<Camera> camera;
+	RTCDevice device;
 
 private:
+
 	RTCScene TheScene;
 	RTCIntersectContext context;
-	std::shared_ptr<Camera> camera;
-
 	std::vector<std::shared_ptr<Model>> Models;
 
 	std::vector<std::shared_ptr<Light>> Lights;

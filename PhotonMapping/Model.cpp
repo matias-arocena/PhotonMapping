@@ -5,8 +5,9 @@
 #include <assimp/postprocess.h>
 #include <iostream>
 
-Model::Model(const char* objFilePath, RTCDevice device)
+Model::Model(const char* objFilePath, RTCDevice device, glm::vec3 position)
 {
+    this->position = position;
     this->meshes = std::vector<std::shared_ptr<Mesh>>();
     this->loadModel(objFilePath, device);
 }
@@ -34,7 +35,7 @@ void Model::processNode(aiNode* node, const aiScene* scene, RTCDevice device)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
-        std::shared_ptr<Mesh> meshPtr = std::make_shared<Mesh>(mesh, scene, device);
+        std::shared_ptr<Mesh> meshPtr = std::make_shared<Mesh>(mesh, scene, device, position);
         this->meshes.push_back(meshPtr);
     }
     // then do the same for each of its children

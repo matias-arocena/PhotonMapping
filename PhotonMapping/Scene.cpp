@@ -13,12 +13,13 @@
 
 Scene::Scene(RTCDevice device)
 {
+    this->device = device;
+	TheScene = rtcNewScene(device);
+	rtcInitIntersectContext(&context);
+
 #ifdef _DEBUG
 	std::cout << "Created Scene" << std::endl;
 #endif
-
-	TheScene = rtcNewScene(device);
-	rtcInitIntersectContext(&context);
 }
 
 Scene::~Scene()
@@ -54,6 +55,7 @@ void Scene::saveImage(std::vector<glm::vec3> buffer)
     FreeImage_DeInitialise();
 }
 
+
 RTCScene Scene::GetScene()
 {
 	return TheScene;
@@ -88,5 +90,17 @@ void Scene::addLight(std::shared_ptr<Light> light)
 void Scene::setCamera(std::shared_ptr<Camera> camera)
 {
     this->camera = camera;
+}
+
+
+void Scene::addModel(std::string objRoute, glm::vec3 position)
+{
+    std::shared_ptr<Model> model = std::make_shared<Model>(objRoute.c_str(), device, position);
+
+    Models.push_back(model);
+
+    AttachModel(std::move(model));
+
+    Commit();
 }
 

@@ -10,12 +10,14 @@ class Model
 {
 public:
 
-	Model(const char* objFilePath, RTCDevice device);
+	Model(const char* objFilePath, RTCDevice device, glm::vec3 position);
 
 	std::vector<std::shared_ptr<Mesh>> getMeshes();
 
 private:
 	std::vector<std::shared_ptr<Mesh>> meshes;
+
+	glm::vec3 position;
 
 	void processNode(aiNode* node, const aiScene* scene, RTCDevice device);
 

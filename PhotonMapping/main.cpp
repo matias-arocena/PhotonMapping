@@ -16,25 +16,13 @@
 
 int main()
 {
-
 	RTCDevice device = rtcNewDevice(nullptr);
 
 	std::shared_ptr<Scene> scene = std::make_shared<Scene>(device);
 
 	importScene(scene);
 
-	const char* objFilePath = "Assets/platform.obj";
-	std::shared_ptr<Model> Triangle = std::make_shared<Model>(objFilePath, device);
-
-	scene->AttachModel(std::move(Triangle));
-
-	scene->Commit();
-
-	Ray FirstRay(glm::vec3{ 0.0f, 0.0f, -3.0f }, glm::vec3{ 0.0f, 0.0f, 1.f });
-
-	Camera camera(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3( 0.0f, 1.0f, 0.0f));
-
-	std::vector<Ray> camRays = camera.generateRaysCamera();
+	std::vector<Ray> camRays = scene->camera->generateRaysCamera();
 	std::vector<glm::vec3> buffer;
 
 	for (Ray camRay : camRays)
@@ -57,5 +45,5 @@ int main()
 
 	scene->saveImage(buffer);
 
-	rtcReleaseDevice(device);
+	rtcReleaseDevice(scene->device);
 }
