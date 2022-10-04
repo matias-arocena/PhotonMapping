@@ -26,6 +26,8 @@ public:
 	void saveImage(std::vector<glm::vec3> buffer);
 	void addModel(std::string objRoute, glm::vec3 position);
 
+	std::shared_ptr<Mesh> getMeshWithGeometryID(unsigned id);
+
 	std::shared_ptr<Camera> camera;
 	RTCDevice device;
 

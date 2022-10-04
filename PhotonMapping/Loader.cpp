@@ -17,9 +17,9 @@ void importModels(pugi::xml_node node, std::shared_ptr<Scene> scene)
 		if (objType.compare("Model") == 0)
 		{
 			glm::vec3 position(0, 0, 0);
-			position.x = obj.attribute("x").as_float();
-			position.y = obj.attribute("y").as_float();
-			position.z = obj.attribute("z").as_float();
+			position.x = obj.attribute("posx").as_float();
+			position.y = obj.attribute("posy").as_float();
+			position.z = obj.attribute("posz").as_float();
 
 			std::string objRoute = obj.attribute("objRoute").as_string();
 

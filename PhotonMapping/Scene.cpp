@@ -67,6 +67,7 @@ void Scene::AttachModel(std::shared_ptr<Model> model)
 	for ( std::shared_ptr<Mesh> mesh : meshes)
 	{
 		int id = rtcAttachGeometry(TheScene, mesh->GetGeometry());
+        mesh->setGeometryId(id);
         std::cout << "id: " << id << std::endl;
 	}
 	
@@ -102,5 +103,20 @@ void Scene::addModel(std::string objRoute, glm::vec3 position)
     AttachModel(std::move(model));
 
     Commit();
+}
+
+std::shared_ptr<Mesh> Scene::getMeshWithGeometryID(unsigned id)
+{
+    for (auto model : this->Models)
+    {
+        for (auto mesh : model->getMeshes())
+        {
+            if (mesh->getGeometryId() == id)
+            {
+                return mesh;
+            }
+        }
+    }
+    return NULL;
 }
 

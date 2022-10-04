@@ -12,6 +12,10 @@
 #include <assimp/importer.hpp>
 
 
+glm::vec3 colorToRgb(const glm::vec3 &color)
+{
+	return glm::vec3(color.r * 255, color.g * 255, color.b * 255);
+}
 
 
 int main()
@@ -33,8 +37,13 @@ int main()
 
 		if (camRay.GetHit(HitCoordinates))
 		{
-			buffer.push_back(glm::vec3{ 255,255,255 });
-			//std::cout << HitCoordinates.x << "," << HitCoordinates.y << "," << HitCoordinates.z << std::endl;
+			RTCRayHit* hit = camRay.GetRayHit();
+			auto mesh = scene->getMeshWithGeometryID(hit->hit.geomID);
+			auto material = mesh->getMaterial();
+			
+			glm::vec3 color = material->getDiffuse();
+			
+			buffer.push_back(colorToRgb(color));
 		}
 		else
 		{
