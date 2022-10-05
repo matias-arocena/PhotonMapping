@@ -28,6 +28,8 @@ public:
 
 	std::shared_ptr<Mesh> getMeshWithGeometryID(unsigned id);
 
+	std::vector<glm::vec3> renderScene();
+
 	std::shared_ptr<Camera> camera;
 	RTCDevice device;
 
@@ -36,7 +38,8 @@ private:
 	RTCScene TheScene;
 	RTCIntersectContext context;
 	std::vector<std::shared_ptr<Model>> Models;
-
 	std::vector<std::shared_ptr<Light>> Lights;
+
+	glm::vec3 shade(const Ray& r, std::shared_ptr<Material> material, int depth);
 };
 

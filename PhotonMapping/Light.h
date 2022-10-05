@@ -7,9 +7,10 @@ class Light
 
 private:
 	float intensity;
-	
+
 
 public:
 	Light(float intensity);
 	float getIntensity();
+	virtual ~Light();
 };

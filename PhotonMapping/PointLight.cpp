@@ -10,7 +10,7 @@ PointLight::~PointLight()
 {
 }
 
-glm::vec3 PointLight::getPosition()
+glm::vec3 PointLight::getPosition() const
 {
 	return position;
 }

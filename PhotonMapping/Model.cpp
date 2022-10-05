@@ -18,7 +18,7 @@ void Model::loadModel(const char* objFilePath, RTCDevice device)
     Assimp::Importer import;
 
     std::cout << objFilePath << std::endl;
-    const aiScene* scene = import.ReadFile(objFilePath, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = import.ReadFile(objFilePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_FixInfacingNormals);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -65,14 +65,19 @@ std::shared_ptr<Mesh> Model::createMesh(aiMesh* mesh, const aiScene* scene, RTCD
 
     RTCGeometry geometry = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
 
-    float * vertexBuffer = (float*)rtcSetNewGeometryBuffer(geometry, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 3 * sizeof(float), mesh->mNumVertices);
+    float * vertexBuffer   = (float*)rtcSetNewGeometryBuffer(geometry, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 3 * sizeof(float), mesh->mNumVertices);
+
     unsigned * indexBuffer = (unsigned*)rtcSetNewGeometryBuffer(geometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, 3 * sizeof(unsigned), mesh->mNumFaces);
+   
+    RTCError e3 = rtcGetDeviceError(device);
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
-        vertexBuffer[i * 3] = mesh->mVertices[i].x + this->position.x;
+        // Vertex
+        vertexBuffer[i * 3]     = mesh->mVertices[i].x + this->position.x;
         vertexBuffer[i * 3 + 1] = mesh->mVertices[i].y + this->position.y;
         vertexBuffer[i * 3 + 2] = mesh->mVertices[i].z + this->position.z;
+
     }
 
     // Asumo que mesh siempre tiene triángulos

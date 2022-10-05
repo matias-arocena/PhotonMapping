@@ -10,3 +10,5 @@ float Light::getIntensity()
 {
 	return intensity;
 }
+
+Light::~Light(){}

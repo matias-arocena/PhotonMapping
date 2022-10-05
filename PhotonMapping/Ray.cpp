@@ -19,7 +19,7 @@ Ray::~Ray()
 {
 }
 
-bool Ray::GetHit(glm::vec3 &OutHitCoordinates)
+bool Ray::GetHit(glm::vec3 &OutHitCoordinates) const
 {
 	if (RayHit->hit.geomID != RTC_INVALID_GEOMETRY_ID) {
 		OutHitCoordinates = Origin + RayHit->ray.tfar * Direction;
@@ -31,8 +31,28 @@ bool Ray::GetHit(glm::vec3 &OutHitCoordinates)
 	}
 }
 
-RTCRayHit* Ray::GetRayHit()
+bool Ray::GetHit() const
+{
+	return RayHit->hit.geomID != RTC_INVALID_GEOMETRY_ID;
+}
+
+RTCRayHit* Ray::GetRayHit() const
 {
 	return RayHit;
 }
 
+glm::vec3 Ray::getNormal() const 
+{
+	if (RayHit->hit.geomID != RTC_INVALID_GEOMETRY_ID)
+	{
+		return glm::normalize(glm::vec3(
+			RayHit->hit.Ng_x,
+			RayHit->hit.Ng_y,
+			RayHit->hit.Ng_z
+		));
+	}
+	else
+	{
+		return glm::vec3(0,0,0);
+	}
+}

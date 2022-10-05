@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <Scene resx="1920" resy="1080" maxDepth="8" bgColorR="0" bgColorG="0" bgColorB="0" fov="120">
     <Models>
-        <Model posx="2" posy="0" posz="0" objRoute="Assets/platform.obj"/>
+        <Model posx="0" posy="0" posz="0" objRoute="Assets/test.obj"/>
     </Models>
     <Lights>
-        <PointLight x="9.9" y="4.9" z="4.9" intensity="5"/>
-        <PointLight x="-4.9" y="4.9" z="4.9" intensity="5"/>
-        <PointLight x="9.9" y="-4.9" z="4.9" intensity="5"/>
-        <PointLight x="-4.9" y="-4.9" z="4.9" intensity="5"/>
-        <PointLight x="9.9" y="4.9" z="-0.9" intensity="5"/>
-		<PointLight x="-4.9" y="4.9" z="-0.9" intensity="5"/>
-		<PointLight x="9.9" y="-4.9" z="-0.9" intensity="5"/>
-		<PointLight x="-4.9" y="-4.9" z="-0.9" intensity="5"/>
+        <PointLight x="4.9" y="4.9" z="4.9" intensity="3"/>
+        <PointLight x="1.0" y="-10" z="-1" intensity="10"/>
     </Lights>
-    <Camera x="0" y="0" z="-5" upx="0" upy="1" upz="0" dirx="0" diry="0" dirz="1"/>
+    <Camera x="0" y="0" z="-10" upx="0" upy="1" upz="0" dirx="0" diry="0" dirz="1"/>
 </Scene>
