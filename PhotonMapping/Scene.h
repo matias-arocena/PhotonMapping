@@ -6,7 +6,11 @@
 #include "Camera.h"
 #include <iostream>
 #include "Model.h"
+<<<<<<< HEAD
 #include "PhotonMap.h"
+=======
+#include "PointLight.h"
+>>>>>>> 121e4c99f463a26d90cfa678e075fcf590a6fae2
 
 class Model;
 class Ray;
@@ -26,7 +30,7 @@ public:
 	void setCamera(std::shared_ptr<Camera> camera);
 	std::shared_ptr<Camera> getCamera();
 	void saveImage(std::vector<glm::vec3> buffer);
-	void addModel(std::string objRoute, glm::vec3 position);
+	void addModel(std::string objRoute, glm::vec3 position, float reflection, float refraction);
 
 	std::shared_ptr<Mesh> getMeshWithGeometryID(unsigned id);
 
@@ -42,6 +46,8 @@ private:
 	std::vector<std::shared_ptr<Model>> Models;
 	std::vector<std::shared_ptr<Light>> Lights;
 
-	glm::vec3 shade(const Ray& r, std::shared_ptr<Material> material, int depth);
+	glm::vec3 trace(Ray ray, int depth, float currentRefract);
+	glm::vec3 shade(const Ray& r, std::shared_ptr<Material> material, int depth, float currentRefract);
+
 };
 

@@ -3,14 +3,14 @@
 #include <assimp/scene.h>
 
 
-Material::Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 ambient, glm::vec3 colorTransparent, float refraction, float reflection, float transparency, float specularExponent, float specularFactor)
+Material::Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 ambient, glm::vec3 colorTransparent, float refraction, float reflection, float opacity, float specularExponent, float specularFactor)
 {
 	this->diffuse = diffuse;
 	this->ambient = ambient;
 	this->reflection = glm::clamp(reflection, 0.f, 1.f);
 	this->refraction = refraction;
 	this->specular = specular;
-	this->transparency = transparency;
+	this->opacity = opacity;
 	this->specularExponent = specularExponent;
 	this->specularFactor = specularFactor;
 	this->colorTransparent = colorTransparent;
@@ -50,13 +50,15 @@ Material::Material(aiMaterial* material)
 	// Ior
 	material->Get(AI_MATKEY_REFRACTI, this->refraction);
 
-	// Refraction - Transparency ? (Alpha en blender)
-	material->Get(AI_MATKEY_OPACITY, this->transparency);
+	// Refraction - opacity ? (Alpha en blender)
+	material->Get(AI_MATKEY_OPACITY, this->opacity);
 
 	// Store in glm vec3
 	this->diffuse = assimpColorToGlm(difColor);
 	this->specular = assimpColorToGlm(speColor);
 	this->colorTransparent = assimpColorToGlm(traColor);
+	this->reflection = 0.5f;
+	this->refraction = .0f;
 }
 
 glm::vec3 Material::getDiffuse()
@@ -89,9 +91,9 @@ float Material::getReflection()
 	return this->reflection;
 }
 
-float Material::getTransparency()
+float Material::getOpacity()
 {
-	return this->transparency;
+	return this->opacity;
 }
 
 float Material::getSpecularExponent()
