@@ -1,5 +1,7 @@
 #include "KdTree.h"
 #include <numeric>
+#include <fstream>
+#include <ostream>
 
 #include "glm/glm.hpp"
 
@@ -14,7 +16,7 @@ float KdTree::distance2(const Photon& p1, const Photon& p2)
 
 void KdTree::buildNode(int* indices, int n_points, int depth)
 {
-if (n_points <= 0) return;
+	if (n_points <= 0) return;
 
     // choose separation axis
     const int axis = depth % 3;
@@ -59,7 +61,7 @@ if (n_points <= 0) return;
     }
 }
 
-void KdTree::searchKNearestNode(int nodeIdx, const Photon& queryPoint, int k, std::priority_queue<std::pair<float, int>>& queue) const
+void KdTree::searchKNearestNode(int nodeIdx, const Photon& queryPoint, int k, KNNQueue& queue) const
 {
    if (nodeIdx == -1 || nodeIdx >= nodes.size()) return;
 
@@ -129,4 +131,45 @@ std::vector<int> KdTree::searchKNearest(const Photon& queryPoint, int k, float& 
     }
 
     return ret;
+}
+
+
+KdTree KdTree::LoadKdTreeFromFile(const std::string& path)
+{
+    static std::vector<Photon> photons;
+
+    std::string line;
+    std::ifstream file;
+    file.open(path);
+    if (file.is_open())
+    {
+        while (std::getline(file, line))
+        {
+            Photon p;
+            p.LoadFromString(line);
+
+            photons.push_back(p);
+        }
+        file.close();
+    }
+
+    KdTree tree;
+    
+    tree.setPoints(&photons.data()[0], photons.size());
+    tree.buildTree();
+
+    return tree;
+}
+
+void KdTree::SaveKdTreeToFile(const std::string& path)
+{
+    std::ofstream file;
+    file.open(path, std::ofstream::out | std::ofstream::trunc);
+
+    for (int i = 0; i < nPoints; ++i)
+    {
+        file << points[i] << std::endl;
+    }
+    
+    file.close();
 }

@@ -1,8 +1,9 @@
 #pragma once
 #include <vector>
 #include <queue>
+#include <string>
 
-class Photon;
+struct Photon;
 
 class KdTree {
  private:
@@ -24,10 +25,12 @@ class KdTree {
   static float distance2(const Photon& p1, const Photon& p2);
   void buildNode(int* indices, int n_points, int depth);
   void searchKNearestNode(int nodeIdx, const Photon& queryPoint, int k, KNNQueue& queue) const;
-
  public:
   KdTree() {}
   void setPoints(const Photon* points, int nPoints);
   void buildTree();
   std::vector<int> searchKNearest(const Photon& queryPoint, int k, float& maxDist2) const;
+
+  static KdTree LoadKdTreeFromFile(const std::string& path);
+  void SaveKdTreeToFile(const std::string& path);
 };
