@@ -8,9 +8,9 @@
 #include "PhotonMap.h"
 
 
-float KdTree::distance2(const Photon& p1, const Photon& p2)
+float KdTree::distance2(const glm::vec3& p1, const Photon& p2)
 {
-	glm::vec3 diff = p2.position - p1.position;
+	glm::vec3 diff = p2.position - p1;
 	return glm::dot(diff, diff);
 }
 
@@ -61,7 +61,7 @@ void KdTree::buildNode(int* indices, int n_points, int depth)
     }
 }
 
-void KdTree::searchKNearestNode(int nodeIdx, const Photon& queryPoint, int k, KNNQueue& queue) const
+void KdTree::searchKNearestNode(int nodeIdx, const glm::vec3& queryPoint, int k, KNNQueue& queue) const
 {
    if (nodeIdx == -1 || nodeIdx >= nodes.size()) return;
 
@@ -81,7 +81,7 @@ void KdTree::searchKNearestNode(int nodeIdx, const Photon& queryPoint, int k, KN
 
     // if query point is lower than median, search left child
     // else, search right child
-    const bool isLower = queryPoint.position[node.axis] < median.position[node.axis];
+    const bool isLower = queryPoint[node.axis] < median.position[node.axis];
     if (isLower) {
       searchKNearestNode(node.leftChildIdx, queryPoint, k, queue);
     } else {
@@ -90,7 +90,7 @@ void KdTree::searchKNearestNode(int nodeIdx, const Photon& queryPoint, int k, KN
 
     // at leaf node, if size of queue is smaller than k, or queue's largest
     // minimum distance overlaps sibblings region, then search siblings
-    const float dist_to_siblings = median.position[node.axis] - queryPoint.position[node.axis];
+    const float dist_to_siblings = median.position[node.axis] - queryPoint[node.axis];
     if (queue.top().first > dist_to_siblings * dist_to_siblings) {
       if (isLower) {
         searchKNearestNode(node.rightChildIdx, queryPoint, k, queue);
@@ -116,7 +116,7 @@ void KdTree::buildTree()
     buildNode(indices.data(), nPoints, 0);
 }
 
-std::vector<int> KdTree::searchKNearest(const Photon& queryPoint, int k, float& maxDist2) const
+std::vector<int> KdTree::searchKNearest(const glm::vec3& queryPoint, int k, float& maxDist2) const
 {
     KNNQueue queue;
     searchKNearestNode(0, queryPoint, k, queue);

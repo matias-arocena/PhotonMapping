@@ -1,6 +1,8 @@
 #include "PhotonMap.h"
 
+#include <FreeImage.h>
 #include <sstream>
+#include "Settings.h"
 
 void Photon::LoadFromString(std::string photonString)
 {
@@ -44,3 +46,68 @@ std::ostream& operator<<(std::ostream& o, const Photon& a)
 
     return o;
 }
+
+void PhotonMap::addPhoton(const Photon& p)
+{
+    photons.push_back(p);
+}
+
+void PhotonMap::build()
+{
+    kdtree.setPoints(photons.data(), photons.size());
+    kdtree.buildTree();
+}
+
+const int PhotonMap::getSize() const
+{
+    return photons.size();
+}
+
+const Photon& PhotonMap::getPhoton(int i) const
+{
+    return photons[i];
+}
+
+std::vector<int> PhotonMap::queryKNearestPhotons(const glm::vec3& p, int k, float& maxDist2) const
+{
+    return kdtree.searchKNearest(p, k, maxDist2);
+}
+
+std::vector<glm::vec3> PhotonMap::getMapBuffer(Scene& scene)
+{
+   std::vector<glm::vec3> buffer;
+
+    std::vector<Ray> camRays = scene.camera->generateRaysCamera();
+    for (Ray camRay : camRays)
+    {
+        scene.ThrowRay(camRay);
+
+        glm::vec3 HitCoordinates;
+
+        if (camRay.GetHit(HitCoordinates))
+        {     
+            float r2;
+            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 1, r2);
+
+            int photonIndex = photonIndices[0];
+
+            if (r2 < 0.001f)
+            {
+                Photon photon = photons[photonIndex];
+                buffer.push_back(photon.power);
+            }
+            else
+            {
+                buffer.push_back(glm::vec3{ 0,0,0 });
+            }
+        }
+        else
+        {
+            buffer.push_back(glm::vec3{ 0,0,0 });
+            //std::cout << "No hit" << std::endl;
+        }
+    }
+    return buffer;
+
+}
+

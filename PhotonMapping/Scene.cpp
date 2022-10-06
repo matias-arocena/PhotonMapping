@@ -94,6 +94,10 @@ void Scene::setCamera(std::shared_ptr<Camera> camera)
     this->camera = camera;
 }
 
+std::shared_ptr<Camera> Scene::getCamera()
+{
+}
+
 
 void Scene::addModel(std::string objRoute, glm::vec3 position)
 {

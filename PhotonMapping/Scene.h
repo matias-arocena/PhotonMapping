@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include <iostream>
 #include "Model.h"
+#include "PhotonMap.h"
 
 class Model;
 class Ray;
@@ -23,6 +24,7 @@ public:
 	void ThrowRay(Ray& Ray);
 	void addLight(std::shared_ptr<Light> light);
 	void setCamera(std::shared_ptr<Camera> camera);
+	std::shared_ptr<Camera> getCamera();
 	void saveImage(std::vector<glm::vec3> buffer);
 	void addModel(std::string objRoute, glm::vec3 position);
 

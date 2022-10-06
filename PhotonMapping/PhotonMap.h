@@ -5,11 +5,12 @@
 
 #include <string>
 #include <iostream>
+#include "Scene.h"
 
 struct Photon
 {
 	glm::vec3 position;
-	char power[4];
+	glm::vec3 power;
 	char phi, theta;
 
 	/*
@@ -24,4 +25,21 @@ private:
 	static std::vector<std::string> split(const std::string& s, char delim);
 };
 
+class PhotonMap {
+private:
+	std::vector<Photon> photons;
+	KdTree kdtree;
 
+public:
+	PhotonMap() {}
+
+	void addPhoton(const Photon& p);
+	void build();
+
+	const int getSize() const;
+	const Photon& getPhoton(int i) const;
+
+	std::vector<int> queryKNearestPhotons(const glm::vec3& p, int k, float& maxDist2) const;
+
+	std::vector<glm::vec3> getMapBuffer(Scene& scene);
+};

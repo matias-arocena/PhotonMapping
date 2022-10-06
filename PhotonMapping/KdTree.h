@@ -2,6 +2,7 @@
 #include <vector>
 #include <queue>
 #include <string>
+#include "glm/glm.hpp"
 
 struct Photon;
 
@@ -22,14 +23,14 @@ class KdTree {
   const Photon* points;     // pointer to array of points
   int nPoints;              // number of points
 
-  static float distance2(const Photon& p1, const Photon& p2);
+  static float distance2(const glm::vec3& p1, const Photon& p2);
   void buildNode(int* indices, int n_points, int depth);
-  void searchKNearestNode(int nodeIdx, const Photon& queryPoint, int k, KNNQueue& queue) const;
+  void searchKNearestNode(int nodeIdx, const glm::vec3& queryPoint, int k, KNNQueue& queue) const;
  public:
   KdTree() {}
   void setPoints(const Photon* points, int nPoints);
   void buildTree();
-  std::vector<int> searchKNearest(const Photon& queryPoint, int k, float& maxDist2) const;
+  std::vector<int> searchKNearest(const glm::vec3& queryPoint, int k, float& maxDist2) const;
 
   static KdTree LoadKdTreeFromFile(const std::string& path);
   void SaveKdTreeToFile(const std::string& path);
