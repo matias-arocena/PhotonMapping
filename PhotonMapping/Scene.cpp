@@ -8,7 +8,6 @@
 #ifdef _DEBUG
 #include <iostream>
 #endif
-#include "PointLight.h"
 
 
 
@@ -95,7 +94,7 @@ void Scene::setCamera(std::shared_ptr<Camera> camera)
 }
 
 
-void Scene::addModel(std::string objRoute, glm::vec3 position)
+void Scene::addModel(std::string objRoute, glm::vec3 position, float reflection, float refraction)
 {
     std::shared_ptr<Model> model = std::make_shared<Model>(objRoute.c_str(), device, position);
 
@@ -139,39 +138,9 @@ std::vector<glm::vec3> Scene::renderScene()
     std::vector<Ray> camRays = camera->generateRaysCamera();
     for (Ray camRay : camRays)
     {
-        ThrowRay(camRay);
 
-        glm::vec3 HitCoordinates;
+        buffer.push_back(colorToRgb(trace(camRay, Settings::maxDepth, 1.0f)));
 
-        if (camRay.GetHit(HitCoordinates))
-        {
-            RTCRayHit* hit = camRay.GetRayHit();
-            auto mesh = getMeshWithGeometryID(hit->hit.geomID);
-            auto material = mesh->getMaterial();
-
-            glm::vec3 normal = camRay.getNormal();
-			glm::vec3 color = shade(camRay, material, 3);
-			
-			/*            
-			float lightInt = 0;
-            for (auto light : Lights)
-            {   
-                std::shared_ptr<PointLight> pointLight = std::dynamic_pointer_cast<PointLight>(light);
-                glm::vec3 lightDir = glm::normalize(HitCoordinates - pointLight->getPosition());
-                lightInt += glm::dot(normal, lightDir) * light->getIntensity();
-            }
-
-            glm::vec3 color = material->getDiffuse() * lightInt;
-
-			*/
-
-            buffer.push_back(colorToRgb(color));
-        }
-        else
-        {
-            buffer.push_back(glm::vec3{ 0,0,0 });
-            //std::cout << "No hit" << std::endl;
-        }
     }
     return buffer;
 }
@@ -182,7 +151,7 @@ float computePointLightIntensity(glm::vec3 L, const glm::vec3& normal, const flo
 	float lightInt; // Light intensity
 	float fatt = 1 / pow(L.length(), 2); // Factor distancia entre luz y punto
 	L = glm::normalize(L);
-	lightInt = glm::max(glm::dot(normal, -L), 0.f) * fatt * pointLigntInt; // pointLight->getIntensity(); // El dot product de 2 vectores normalizados da el coseno del angulo entre ellos, 50 es la intensidad
+	lightInt = glm::max(glm::dot(normal, L), 0.f) * fatt * pointLigntInt; // pointLight->getIntensity(); // El dot product de 2 vectores normalizados da el coseno del angulo entre ellos, 50 es la intensidad
 
 	lightInt = glm::clamp(lightInt, 0.0f, 1.0f);
 	return lightInt;
@@ -193,27 +162,46 @@ float computeSpecularPointLightIntensity(
 	const Ray& r,
 	const float& lightInt, const float& specularExponent, const float& specularFactor
 ){
-	glm::vec3 R = glm::reflect(-L, normal);
+	glm::vec3 R = glm::reflect(L, normal);
 	float specAmmount = glm::dot(r.Direction, R);
 	if (specAmmount < 0) specAmmount = 0;
 	return pow(specAmmount, specularExponent) * specularFactor;
 }
 
-bool doComputePointLightShading(const Ray& shadowRay, const glm::vec3& hitPos, std::shared_ptr<PointLight> pointLight, const float& transparency)
+
+glm::vec3 Scene::trace(Ray ray, int depth, float currentRefract)
 {
-	glm::vec3 rayHit;
-	return !shadowRay.GetHit(rayHit)									  // Didn't hit or
-		|| (hitPos - rayHit).length() > (pointLight->getPosition() - rayHit).length() // Light is before the hit object or
-		|| transparency > 0;														  // The hitted object has some transparency
+	glm::vec3 color = Settings::backgroundColor; 
+	if (depth <= 0)
+	{
+		return color;
+	}
+
+	ThrowRay(ray);
+
+	glm::vec3 HitCoordinates;
+
+	if (ray.GetHit(HitCoordinates))
+	{
+		RTCRayHit* hit = ray.GetRayHit();
+		auto mesh = getMeshWithGeometryID(hit->hit.geomID);
+		auto material = mesh->getMaterial();
+
+		color += shade(ray, material, Settings::maxDepth, currentRefract);
+	}
+
+	return color;
+	
 }
 
 
-glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int depth) {
+glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int depth, float currentRefract) {
 	// Ambient light
 	glm::vec3 color = glm::vec3(0,0,0);
 	glm::vec3 normal = r.getNormal();
 	glm::vec3 hitPos;
 	r.GetHit(hitPos);
+
 
 	for (auto light : Lights)
 	{
@@ -225,35 +213,66 @@ glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int dep
 		{
 			glm::vec3 L = pointLight->getPosition() - hitPos;
 			
-			Ray shadowRay = Ray(hitPos, glm::normalize(L)); // Ray from hit to light source
+			Ray shadowRay = Ray(hitPos + (normal * 0.01f), glm::normalize(L)); // Ray from hit to light source
+
 			glm::vec3 shadowHitPos;
 			ThrowRay(shadowRay);
-			if (doComputePointLightShading(shadowRay, hitPos, pointLight, material->getTransparency()))
+
+			if (shadowRay.GetHit(shadowHitPos))
+			{
+				float opacity = 1;
+				RTCRayHit* hit = shadowRay.GetRayHit();
+				auto mesh = getMeshWithGeometryID(hit->hit.geomID);
+				auto hitMaterial = mesh->getMaterial();
+				opacity = hitMaterial->getOpacity();
+
+				if (opacity < 1 || (hitPos - shadowHitPos).length() > (pointLight->getPosition() - shadowHitPos).length())
+				{
+					// Diffuse Light intensity
+					float lightInt = computePointLightIntensity(L, normal, light->getIntensity()) * (1 - opacity);
+
+					// Phong Specular intensity
+					L = glm::normalize(L);
+					float specInt = computeSpecularPointLightIntensity(L, normal, r, lightInt, hitMaterial->getSpecularExponent(), hitMaterial->getSpecularFactor());
+
+					color += (material->getDiffuse() * lightInt) + specInt;
+				}
+			}
+			else
 			{
 				// Diffuse Light intensity
 				float lightInt = computePointLightIntensity(L, normal, light->getIntensity());
-				
-				// Phong Specular intensity
+
 				L = glm::normalize(L);
+				// Phong Specular intensity
 				float specInt = computeSpecularPointLightIntensity(L, normal, r, lightInt, material->getSpecularExponent(), material->getSpecularFactor());
-				
-				// Translucent obstacle incidence 
-				glm::vec3 obstacleIncidence(1, 1, 1);
-				glm::vec3 rayHit;
-				if (shadowRay.GetHit(rayHit) && (hitPos - rayHit).length() <= (pointLight->getPosition() - rayHit).length())
-				{
-					obstacleIncidence = material->getColorTransparent();
-				}
-				auto quesesto = glm::vec3(
-					((material->getDiffuse().r * lightInt) + specInt) * obstacleIncidence.r,
-					((material->getDiffuse().g * lightInt) + specInt) * obstacleIncidence.g,
-					((material->getDiffuse().b * lightInt) + specInt) * obstacleIncidence.b
-				);
-				color += quesesto;
+
+				color += (material->getDiffuse() * lightInt) + specInt;
+
 			}
+
 		}
 
 	}
+
+	if (material->getOpacity() < 1) {
+
+		glm::vec3 reflect = glm::reflect(r.Direction, normal);
+		glm::vec3 refract = glm::refract(r.Direction, normal, currentRefract / material->getRefraction());
+
+		Ray reflectRay(hitPos, reflect);
+		Ray refractRay(hitPos, refract);
+
+		color += trace(reflectRay, depth - 1, material->getRefraction());
+		color += trace(refractRay, depth - 1, material->getRefraction());
+	}
+	else if (material->getReflection())
+	{
+		glm::vec3 reflect = glm::reflect(r.Direction, normal);
+		Ray reflectRay(hitPos + (normal * 0.01f), reflect);
+		color += trace(reflectRay, depth - 1, currentRefract) * material->getReflection();
+	}
+
 	/*
 	double D_N = dot(r.d, p->normal);
 	if (profundidad > 0) {

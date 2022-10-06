@@ -15,10 +15,10 @@ private:
     glm::vec3 colorTransparent;
     float refraction;
     float reflection;
-    float transparency;
+    float opacity;
 
 public:
-    Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 ambient, glm::vec3 colorTransparent, float refraction, float reflection, float transparency, float specularExponent, float specularFactor);
+    Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 ambient, glm::vec3 colorTransparent, float refraction, float reflection, float opacity, float specularExponent, float specularFactor);
     Material(aiMaterial* material);
 
     glm::vec3 getDiffuse();
@@ -27,7 +27,7 @@ public:
     glm::vec3 getColorTransparent();
     float getRefraction();
     float getReflection();
-    float getTransparency();
+    float getOpacity();
     float getSpecularExponent();
     float getSpecularFactor();
 

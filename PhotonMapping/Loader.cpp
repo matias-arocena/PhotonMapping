@@ -21,9 +21,12 @@ void importModels(pugi::xml_node node, std::shared_ptr<Scene> scene)
 			position.y = obj.attribute("posy").as_float();
 			position.z = obj.attribute("posz").as_float();
 
+			float reflection = obj.attribute("reflection").as_float();
+			float refraction = obj.attribute("refraction").as_float();
+
 			std::string objRoute = obj.attribute("objRoute").as_string();
 
-			scene->addModel(objRoute, position);
+			scene->addModel(objRoute, position, reflection, refraction);
 		}
 	}
 }
