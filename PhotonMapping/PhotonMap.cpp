@@ -19,6 +19,10 @@ void Photon::LoadFromString(std::string photonString)
 
 }
 
+void Photon::trace(glm::vec3 from, glm::vec3 to, glm::vec3 power)
+{
+}
+
 std::vector<std::string> Photon::split(const std::string& s, char delim)
 {
     std::vector<std::string> result;
