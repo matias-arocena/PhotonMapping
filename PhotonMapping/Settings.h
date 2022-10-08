@@ -12,4 +12,5 @@ public:
 	static glm::vec3 backgroundColor;
 	static int fov;
 	static int antialiasing;
+	static int smoothness;
 };

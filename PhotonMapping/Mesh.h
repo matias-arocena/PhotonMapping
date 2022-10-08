@@ -10,10 +10,10 @@ class Mesh
 {
 public:
 	Mesh(float* vertexBuffer, unsigned* indexBuffer, const RTCGeometry& geometry, std::shared_ptr<Material> material);
+	Mesh();
+	virtual ~Mesh();
 
-	~Mesh();
-
-	RTCGeometry GetGeometry();
+	RTCGeometry getGeometry();
 	void setGeometryId(unsigned id);
 	unsigned getGeometryId();
 
@@ -22,11 +22,12 @@ public:
 	// void LoadGeometry()
 
 
-private:
+protected:
 	RTCGeometry geometry;
 	float* vertexBuffer;
 	unsigned* indexBuffer;
 	unsigned geometryId;
 	std::shared_ptr<Material> material;
+
 };
 

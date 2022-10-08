@@ -31,8 +31,8 @@ public:
 	void saveImage(std::vector<glm::vec3> buffer);
 	void addModel(std::string objRoute, glm::vec3 position, float reflection, float refraction);
 
-	std::shared_ptr<Mesh> getMeshWithGeometryID(unsigned id);
-	bool getMeshWithGeometryID(unsigned id, Mesh& mesh);
+	//std::shared_ptr<Mesh> getMeshWithGeometryID(unsigned id);
+	//bool getMeshWithGeometryID(unsigned id, std::shared_ptr<Mesh> mesh);
 
 	std::vector<glm::vec3> renderScene();
 
@@ -46,9 +46,10 @@ private:
 	std::vector<std::shared_ptr<Model>> models;
 	std::vector<std::shared_ptr<Light>> lights;
 	std::shared_ptr<Camera> camera;
+	std::vector<std::shared_ptr<Mesh>> meshes;
 
 	glm::vec3 trace(Ray ray, int depth, float currentRefract);
 	glm::vec3 shade(const Ray& r, std::shared_ptr<Material> material, int depth, float currentRefract);
-
+	glm::vec3 computeShadow(glm::vec3 position, glm::vec3 normal, glm::vec3 hitPos, float intensity, std::shared_ptr<Material> material, Ray r, int lightId);
 };
 

@@ -164,6 +164,7 @@ void importScene()
 	};
 
 	Settings::fov = doc.child("Scene").attribute("fov").as_int();
+	Settings::smoothness = doc.child("Scene").attribute("smoothness").as_int();
 
 	importModels(doc.child("Scene"));
 	importLights(doc.child("Scene"));

@@ -56,10 +56,12 @@ RTCScene Scene::getScene()
 
 void Scene::attachModel(std::shared_ptr<Model> model)
 {
-	std::vector<std::shared_ptr<Mesh>> meshes = model->getMeshes();
-	for ( std::shared_ptr<Mesh> mesh : meshes)
+	std::vector<std::shared_ptr<Mesh>> modMeshes = model->getMeshes();
+	for ( std::shared_ptr<Mesh> mesh : modMeshes)
 	{
-		int id = rtcAttachGeometry(scene, mesh->GetGeometry());
+		int id = meshes.size();
+		meshes.push_back(mesh);
+		rtcAttachGeometryByID(scene, mesh->getGeometry(), id);
         mesh->setGeometryId(id);
         std::cout << "id: " << id << std::endl;
 	}
@@ -81,11 +83,15 @@ void Scene::addLight(std::shared_ptr<Light> light)
 	std::shared_ptr<SquareLight> squareLight = std::dynamic_pointer_cast<SquareLight>(light);
 	if (squareLight)
 	{
+		int id = meshes.size();
+		meshes.push_back(squareLight);
 		RTCDevice device = Device::getInstance().getDevice();
 		squareLight->createEmbreeMesh(device);
-		int id = rtcAttachGeometry(scene, squareLight->getGeometry());
-		RTCError error = rtcGetDeviceError(device);
+		rtcAttachGeometryByID(scene, squareLight->getGeometry(), id);
 		squareLight->setGeometryId(id);
+		
+
+		RTCError error = rtcGetDeviceError(device);
 	}
     lights.push_back(light);
 }
@@ -112,36 +118,36 @@ void Scene::addModel(std::string objRoute, glm::vec3 position, float reflection,
     commit();
 }
 
-std::shared_ptr<Mesh> Scene::getMeshWithGeometryID(unsigned id)
-{
-    for (auto model : this->models)
-    {
-        for (auto mesh : model->getMeshes())
-        {
-            if (mesh->getGeometryId() == id)
-            {
-                return mesh;
-            }
-        }
-    }
-    return NULL;
-}
-
-bool Scene::getMeshWithGeometryID(unsigned id, Mesh &mesh)
-{
-	for (auto model : this->models)
-	{
-		for (auto msh : model->getMeshes())
-		{
-			if (msh->getGeometryId() == id)
-			{
-				mesh = *msh;
-				return true;
-			}
-		}
-	}
-	return false;
-}
+//std::shared_ptr<Mesh> Scene::getMeshWithGeometryID(unsigned id)
+//{
+//    for (auto model : this->models)
+//    {
+//        for (auto mesh : model->getMeshes())
+//        {
+//            if (mesh->getGeometryId() == id)
+//            {
+//                return mesh;
+//            }
+//        }
+//    }
+//    return NULL;
+//}
+//
+//bool Scene::getMeshWithGeometryID(unsigned id, std::shared_ptr<Mesh> mesh)
+//{
+//	for (auto model : this->models)
+//	{
+//		for (auto msh : model->getMeshes())
+//		{
+//			if (msh->getGeometryId() == id)
+//			{
+//				mesh = msh;
+//				return true;
+//			}
+//		}
+//	}
+//	return false;
+//}
 
 
 
@@ -207,10 +213,28 @@ glm::vec3 Scene::trace(Ray ray, int depth, float currentRefract)
 	if (ray.getHit(HitCoordinates))
 	{
 		RTCRayHit* hit = ray.getRayHit();
-		auto mesh = getMeshWithGeometryID(hit->hit.geomID);
-		auto material = mesh->getMaterial();
+		if (hit->hit.geomID > meshes.size())
+		{
+			std::cout << "se rompe" << std::endl;
+		}
+		std::shared_ptr<Mesh> mesh = NULL;
+		std::shared_ptr<SquareLight> squareLight = NULL;
+		if (hit->hit.geomID < meshes.size())
+		{
+			mesh = meshes[hit->hit.geomID];
+			squareLight = std::dynamic_pointer_cast<SquareLight>(mesh);
+		}
 
-		color += shade(ray, material, depth, currentRefract);
+		if (squareLight == NULL)
+		{
+			auto material = mesh->getMaterial();
+
+			color = shade(ray, material, depth, currentRefract);
+		}
+		else
+		{
+			color = squareLight->getColor();
+		}
 	}
 
 	return color;
@@ -218,9 +242,69 @@ glm::vec3 Scene::trace(Ray ray, int depth, float currentRefract)
 }
 
 
+glm::vec3 Scene::computeShadow(glm::vec3 lightPosition, glm::vec3 normal, glm::vec3 hitPos, float intensity, std::shared_ptr<Material> material, Ray r, int lightId)
+{
+	glm::vec3 color = Settings::backgroundColor;
+	glm::vec3 L = lightPosition - hitPos;
+
+	Ray shadowRay = Ray(hitPos + (normal * 0.01f), glm::normalize(L)); // Ray from hit to light source
+
+	glm::vec3 shadowHitPos;
+	throwRay(shadowRay);
+
+	std::shared_ptr<Mesh> mesh = NULL;
+	std::shared_ptr<SquareLight> squareLight = NULL;
+	if (shadowRay.getHit(shadowHitPos) && shadowRay.getRayHit()->hit.geomID < meshes.size())
+	{
+		mesh = meshes[shadowRay.getRayHit()->hit.geomID];
+		squareLight = std::dynamic_pointer_cast<SquareLight>(mesh);
+	}
+
+	if (shadowRay.getHit(shadowHitPos) && 
+		glm::distance(hitPos, shadowHitPos) <= glm::distance(lightPosition, shadowHitPos) && 
+		squareLight == NULL && 
+		shadowRay.getRayHit()->hit.geomID != lightId)
+	{
+		float opacity = 1;
+		RTCRayHit* hit = shadowRay.getRayHit();
+		auto hitMaterial = mesh->getMaterial();
+		opacity = hitMaterial->getOpacity();
+
+		auto obst_dist = glm::distance(hitPos, shadowHitPos);
+		auto light_dist = glm::distance(lightPosition, shadowHitPos);
+
+		if (opacity < 1 || glm::distance(hitPos, shadowHitPos) <= glm::distance(lightPosition, shadowHitPos))
+		{
+			// Diffuse Light intensity
+			float lightInt = computePointLightIntensity(L, normal, intensity) * (1 - opacity);
+
+			// Phong Specular intensity
+			L = glm::normalize(L);
+			float specInt = computeSpecularPointLightIntensity(L, normal, r, lightInt, hitMaterial->getSpecularExponent(), hitMaterial->getSpecularFactor());
+
+			color = (material->getDiffuse() * lightInt) + specInt;
+		}
+	}
+	else if (squareLight == NULL || shadowRay.getRayHit()->hit.geomID == lightId)
+	{
+		// Diffuse Light intensity
+		float lightInt = computePointLightIntensity(L, normal, intensity);
+
+		L = glm::normalize(L);
+		// Phong Specular intensity
+		float specInt = computeSpecularPointLightIntensity(L, normal, r, lightInt, material->getSpecularExponent(), material->getSpecularFactor());
+
+		color = (material->getDiffuse() * lightInt) + specInt;
+
+	}
+	return color;
+}
+
+
+
 glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int depth, float currentRefract) {
 	// Ambient light
-	glm::vec3 color = glm::vec3(0,0,0);
+	glm::vec3 color = Settings::backgroundColor;
 	glm::vec3 normal = r.getNormal();
 	glm::vec3 hitPos;
 	r.getHit(hitPos);
@@ -234,57 +318,19 @@ glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int dep
 		std::shared_ptr<PointLight> pointLight = std::dynamic_pointer_cast<PointLight>(light);
 		if (pointLight != NULL)
 		{
-			glm::vec3 L = pointLight->getPosition() - hitPos;
-			
-			Ray shadowRay = Ray(hitPos + (normal * 0.01f), glm::normalize(L)); // Ray from hit to light source
-
-			glm::vec3 shadowHitPos;
-			throwRay(shadowRay);
-			
-			Mesh *mesh = NULL;
-			if (shadowRay.getHit(shadowHitPos) && glm::distance(hitPos, shadowHitPos) <= glm::distance(pointLight->getPosition(), shadowHitPos) && getMeshWithGeometryID(shadowRay.getRayHit()->hit.geomID, *mesh))
-			{
-				float opacity = 1;
-				RTCRayHit* hit = shadowRay.getRayHit();
-				auto hitMaterial = mesh->getMaterial();
-				opacity = hitMaterial->getOpacity();
-
-				auto obst_dist = glm::distance(hitPos, shadowHitPos);
-				auto light_dist = glm::distance(pointLight->getPosition(), shadowHitPos);
-
-				if (opacity < 1 || glm::distance(hitPos, shadowHitPos) <= glm::distance(pointLight->getPosition(), shadowHitPos))
-				{
-					// Diffuse Light intensity
-					float lightInt = computePointLightIntensity(L, normal, light->getIntensity()) * (1 - opacity);
-
-					// Phong Specular intensity
-					L = glm::normalize(L);
-					float specInt = computeSpecularPointLightIntensity(L, normal, r, lightInt, hitMaterial->getSpecularExponent(), hitMaterial->getSpecularFactor());
-
-					color += (material->getDiffuse() * lightInt) + specInt;
-				}
-			}
-			else
-			{
-				// Diffuse Light intensity
-				float lightInt = computePointLightIntensity(L, normal, light->getIntensity());
-
-				L = glm::normalize(L);
-				// Phong Specular intensity
-				float specInt = computeSpecularPointLightIntensity(L, normal, r, lightInt, material->getSpecularExponent(), material->getSpecularFactor());
-
-				color += (material->getDiffuse() * lightInt) + specInt;
-
-			}
-
+			color += computeShadow(pointLight->getPosition(), normal, hitPos, pointLight->getIntensity(), material, r, -1);
 		}
+
 		/* Square light */
 		std::shared_ptr<SquareLight> squareLight = std::dynamic_pointer_cast<SquareLight>(light);
 		if (squareLight != NULL)
 		{
-
-
-
+			std::vector<glm::vec3> points = squareLight->getRandomPositions(Settings::smoothness);
+			float intensity = squareLight->getIntensity() / points.size();
+			for (glm::vec3 point : points)
+			{
+				color += computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
+			}
 		}
 
 	}
@@ -342,8 +388,6 @@ glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int dep
 			}
 		}
 	}
-
-
 
 	if (color.getX() > 1) color.x = 1;
 	if (color.getY() > 1) color.y = 1;

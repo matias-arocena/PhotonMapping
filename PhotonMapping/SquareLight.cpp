@@ -12,7 +12,7 @@ void SquareLight::createEmbreeMesh(RTCDevice device)
     error = rtcGetDeviceError(device);
     indexBuffer = (unsigned*)rtcSetNewGeometryBuffer(geometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT4, 4 * sizeof(unsigned), 1);
     error = rtcGetDeviceError(device);
-    u = glm::cross(normal, u);
+    u = glm::cross(glm::normalize(normal), v);
 
     glm::vec3 vertx[4];
     vertx[0] = center + u - v;
@@ -33,24 +33,14 @@ void SquareLight::createEmbreeMesh(RTCDevice device)
     rtcCommitGeometry(geometry);
 }
 
-void SquareLight::setGeometryId(unsigned id)
-{
-    geometryId = id;
-}
-
 glm::vec3 SquareLight::getNormal()
 {
     return normal;
 }
 
-RTCGeometry SquareLight::getGeometry()
+std::vector<glm::vec3> SquareLight::getRandomPositions(unsigned rowQty)
 {
-    return geometry;
-}
-
-glm::vec3* SquareLight::getRandomPositions(unsigned rowQty)
-{
-    glm::vec3* points = new glm::vec3[rowQty*rowQty];
+    std::vector<glm::vec3> points;
 
     float div = 2.f / RAND_MAX;
     for (unsigned i = 1; i < rowQty - 1; i++)
@@ -59,10 +49,10 @@ glm::vec3* SquareLight::getRandomPositions(unsigned rowQty)
         {
             float v_rand = (1 - rand() * div); // -1 .. 1
             float u_rand = (1 - rand() * div); // -1 .. 1
-
-            points[rowQty * i + j] = center + v * v_rand + u * u_rand;
+            points.push_back(center + v * v_rand + u * u_rand);
         }
     }
 
+    return points;
 }
 

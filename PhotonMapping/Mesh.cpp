@@ -12,6 +12,8 @@ Mesh::Mesh(float* vertexBuffer, unsigned* indexBuffer, const RTCGeometry& geomet
 	this->material = material;
 }
 
+Mesh::Mesh(){}
+
 Mesh::~Mesh()
 {
 	rtcReleaseGeometry(geometry);
@@ -31,7 +33,7 @@ unsigned Mesh::getGeometryId()
 	return geometryId;
 }
 
-RTCGeometry Mesh::GetGeometry()
+RTCGeometry Mesh::getGeometry()
 {
 	return geometry;
 }

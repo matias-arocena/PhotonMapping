@@ -15,6 +15,7 @@ public:
 	float getIntensity();
 	void emitPhotons();
 	virtual ~Light();
+	glm::vec3 getColor();
 
 private:
 	virtual glm::vec3 getPhotonDirection() const;
