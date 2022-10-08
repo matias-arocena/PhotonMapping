@@ -11,7 +11,7 @@ class Model
 {
 public:
 
-	Model(const char* objFilePath, RTCDevice device, glm::vec3 position);
+	Model(const char* objFilePath, glm::vec3 position);
 
 	std::vector<std::shared_ptr<Mesh>> getMeshes();
 
@@ -21,10 +21,10 @@ private:
 
 	glm::vec3 position;
 
-	void processNode(aiNode* node, const aiScene* scene, RTCDevice device);
-	void loadModel(const char* objFilePath, RTCDevice device);
+	void processNode(aiNode* node, const aiScene* scene);
+	void loadModel(const char* objFilePath);
 
-	std::shared_ptr<Mesh> createMesh(aiMesh* mesh, const aiScene* scene, RTCDevice device);
+	std::shared_ptr<Mesh> createMesh(aiMesh* mesh, const aiScene* scene);
 
 
 };

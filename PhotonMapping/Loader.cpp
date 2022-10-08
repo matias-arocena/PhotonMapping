@@ -8,7 +8,7 @@
 #include "SquareLight.h"
 
 
-void importModels(pugi::xml_node node, std::shared_ptr<Scene> scene)
+void importModels(pugi::xml_node node)
 {
 	//Models
 	for (pugi::xml_node obj : node.child("Models"))
@@ -27,13 +27,13 @@ void importModels(pugi::xml_node node, std::shared_ptr<Scene> scene)
 
 			std::string objRoute = obj.attribute("objRoute").as_string();
 
-			scene->addModel(objRoute, position, reflection, refraction);
+			Scene::getInstance().addModel(objRoute, position, reflection, refraction);
 		}
 	}
 }
 
 
-void importLights(pugi::xml_node node, std::shared_ptr<Scene> scene)
+void importLights(pugi::xml_node node)
 {
 	//Lights
 	for (pugi::xml_node obj : node.child("Lights"))
@@ -47,16 +47,22 @@ void importLights(pugi::xml_node node, std::shared_ptr<Scene> scene)
 			position.y = obj.attribute("y").as_float();
 			position.z = obj.attribute("z").as_float();
 
+			glm::vec3 color;
+			color.r = obj.attribute("colorr").as_float();
+			color.g = obj.attribute("colorg").as_float();
+			color.b = obj.attribute("colorb").as_float();
+
 			float intensity = obj.attribute("intensity").as_float();
+			int maximumEmittedPhotons = obj.attribute("maximumEmittedPhotons").as_int();
 
-			std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>(position, intensity);
+			std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>(position, intensity, maximumEmittedPhotons, color);
 
-			scene->addLight(pointLight);
+			Scene::getInstance().addLight(pointLight);
 		}
 
 		if (objType.compare("TriangleLight") == 0)
 		{
-			glm::vec3 p0{ 0,0,0 }, p1{ 0,0,0 }, p2{ 0,0,0 }, direction{ 0,0,0 };
+			glm::vec3 p0{ 0,0,0 }, p1{ 0,0,0 }, p2{ 0,0,0 }, direction{ 0,0,0 }, color{0, 0, 0};
 			direction.x = obj.attribute("dirx").as_float();
 			direction.y = obj.attribute("diry").as_float();
 			direction.z = obj.attribute("dirz").as_float();
@@ -73,11 +79,17 @@ void importLights(pugi::xml_node node, std::shared_ptr<Scene> scene)
 			p2.y = obj.attribute("p2y").as_float();
 			p2.z = obj.attribute("p2z").as_float();
 
+			color.r = obj.attribute("colorr").as_float();
+			color.g = obj.attribute("colorg").as_float();
+			color.b = obj.attribute("colorb").as_float();
+
 			float intensity = obj.attribute("intensity").as_float();
+			int maximumEmittedPhotons = obj.attribute("maximumEmittedPhotons").as_int();
 
-			std::shared_ptr<TriangleLight> triangleLight = std::make_shared<TriangleLight>(p0, p1, p2, direction, intensity);
 
-			scene->addLight(triangleLight);
+			std::shared_ptr<TriangleLight> triangleLight = std::make_shared<TriangleLight>(p0, p1, p2, direction, intensity, maximumEmittedPhotons, color);
+
+			Scene::getInstance().addLight(triangleLight);
 		}
 
 		if (objType.compare("SquareLight") == 0)
@@ -108,7 +120,7 @@ void importLights(pugi::xml_node node, std::shared_ptr<Scene> scene)
 }
 
 
-void importCamera(pugi::xml_node node, std::shared_ptr<Scene> scene)
+void importCamera(pugi::xml_node node)
 {
 	// camera
 	pugi::xml_node obj = node.child("Camera");
@@ -128,10 +140,10 @@ void importCamera(pugi::xml_node node, std::shared_ptr<Scene> scene)
 
 	std::shared_ptr<Camera> camera = std::make_shared<Camera>(position, direction, up);
 
-	scene->setCamera(camera);
+	Scene::getInstance().setCamera(camera);
 }
 
-void importScene(std::shared_ptr<Scene> scene)
+void importScene()
 {
 	pugi::xml_document doc;
 
@@ -156,9 +168,9 @@ void importScene(std::shared_ptr<Scene> scene)
 
 	Settings::fov = doc.child("Scene").attribute("fov").as_int();
 
-	importModels(doc.child("Scene"), scene);
-	importLights(doc.child("Scene"), scene);
-	importCamera(doc.child("Scene"), scene);
+	importModels(doc.child("Scene"));
+	importLights(doc.child("Scene"));
+	importCamera(doc.child("Scene"));
 
 	std::cout << "Scene loaded" << std::endl;
 }

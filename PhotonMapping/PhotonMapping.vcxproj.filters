@@ -60,6 +60,9 @@
     <ClCompile Include="PhotonMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -101,10 +104,24 @@
     <ClInclude Include="PhotonMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="README.md">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="Assets\kdtreesave.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Assets\kdtreeload.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Assets\config.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

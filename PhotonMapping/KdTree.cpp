@@ -30,31 +30,31 @@ void KdTree::buildNode(int* indices, int n_points, int depth)
     const int mid = (n_points - 1) / 2;
 
     // add node to node array, remember index of current node(parent node)
-    const int parentIdx = nodes.size();
+    const int parentIdx = static_cast<int>(nodes.size());
     Node node;
     node.axis = axis;
     node.idx = indices[mid];
     nodes.push_back(node);
 
     // add left children to node array
-    const int leftChildIdx = nodes.size();
+    const int leftChildIdx = static_cast<int>(nodes.size());
     buildNode(indices, mid, depth + 1);
 
     // set index of left child on parent node
     // if size of nodes doesn't change, it means there is no left children
-    if (leftChildIdx == nodes.size()) {
+    if (leftChildIdx == static_cast<int>(nodes.size())) {
       nodes[parentIdx].leftChildIdx = -1;
     } else {
       nodes[parentIdx].leftChildIdx = leftChildIdx;
     }
 
     // add right children to node array
-    const int rightChildIdx = nodes.size();
+    const int rightChildIdx = static_cast<int>(nodes.size());
     buildNode(indices + mid + 1, n_points - mid - 1, depth + 1);
 
     // set index of right child on parent node
     // if size of nodes doesn't change, it means there is no right children
-    if (rightChildIdx == nodes.size()) {
+    if (rightChildIdx == static_cast<int>(nodes.size())) {
       nodes[parentIdx].rightChildIdx = -1;
     } else {
       nodes[parentIdx].rightChildIdx = rightChildIdx;
@@ -134,7 +134,7 @@ std::vector<int> KdTree::searchKNearest(const glm::vec3& queryPoint, int k, floa
 }
 
 
-KdTree KdTree::LoadKdTreeFromFile(const std::string& path)
+KdTree KdTree::loadKdTreeFromFile(const std::string& path)
 {
     static std::vector<Photon> photons;
 
@@ -146,7 +146,7 @@ KdTree KdTree::LoadKdTreeFromFile(const std::string& path)
         while (std::getline(file, line))
         {
             Photon p;
-            p.LoadFromString(line);
+            p.loadFromString(line);
 
             photons.push_back(p);
         }
@@ -155,13 +155,13 @@ KdTree KdTree::LoadKdTreeFromFile(const std::string& path)
 
     KdTree tree;
     
-    tree.setPoints(&photons.data()[0], photons.size());
+    tree.setPoints(&photons.data()[0], static_cast<int>(photons.size()));
     tree.buildTree();
 
     return tree;
 }
 
-void KdTree::SaveKdTreeToFile(const std::string& path)
+void KdTree::saveKdTreeToFile(const std::string& path)
 {
     std::ofstream file;
     file.open(path, std::ofstream::out | std::ofstream::trunc);

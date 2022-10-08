@@ -97,7 +97,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)ThirdParty\libs\embree3.lib;$(ProjectDir)ThirdParty\libs\tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty\libs\assimp-vc143-mt.lib;$(ProjectDir)ThirdParty\libs\embree3.lib;$(ProjectDir)ThirdParty\libs\tbb.lib;$(ProjectDir)ThirdParty\libs\FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)ThirdParty\dlls\*" "$(TargetDir)"</Command>
@@ -117,7 +117,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)ThirdParty\libs\embree3.lib;$(ProjectDir)ThirdParty\libs\tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty\libs\assimp-vc143-mt.lib;$(ProjectDir)ThirdParty\libs\embree3.lib;$(ProjectDir)ThirdParty\libs\tbb.lib;$(ProjectDir)ThirdParty\libs\FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)ThirdParty\dlls\*" "$(TargetDir)"</Command>
@@ -161,6 +161,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Device.cpp" />
     <ClCompile Include="KdTree.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
@@ -179,6 +180,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Device.h" />
     <ClInclude Include="KdTree.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
@@ -194,7 +196,12 @@
     <ClInclude Include="Loader.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Assets\kdtreeload.txt" />
+    <Text Include="Assets\kdtreesave.txt" />
     <Text Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Assets\config.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

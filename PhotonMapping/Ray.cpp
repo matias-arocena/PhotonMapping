@@ -1,28 +1,28 @@
 #include "Ray.h"
 #include <embree3/rtcore.h>
 
-Ray::Ray(glm::vec3 org, glm::vec3 dir) : Origin{org}, Direction{dir}
+Ray::Ray(glm::vec3 org, glm::vec3 dir) : origin{org}, direction{dir}
 {
-	RayHit = new RTCRayHit();
-	RayHit->ray.org_x = org.x; 
-	RayHit->ray.org_y = org.y; 
-	RayHit->ray.org_z = org.z;
-	RayHit->ray.dir_x = dir.x; 
-	RayHit->ray.dir_y = dir.y; 
-	RayHit->ray.dir_z = dir.z;
-	RayHit->ray.tnear = 0.0f;
-	RayHit->ray.tfar = std::numeric_limits<float>::infinity();
-	RayHit->hit.geomID = RTC_INVALID_GEOMETRY_ID;
+	rayHit = new RTCRayHit();
+	rayHit->ray.org_x = org.x; 
+	rayHit->ray.org_y = org.y; 
+	rayHit->ray.org_z = org.z;
+	rayHit->ray.dir_x = dir.x; 
+	rayHit->ray.dir_y = dir.y; 
+	rayHit->ray.dir_z = dir.z;
+	rayHit->ray.tnear = 0.0f;
+	rayHit->ray.tfar = std::numeric_limits<float>::infinity();
+	rayHit->hit.geomID = RTC_INVALID_GEOMETRY_ID;
 }
 
 Ray::~Ray()
 {
 }
 
-bool Ray::GetHit(glm::vec3 &OutHitCoordinates) const
+bool Ray::getHit(glm::vec3 &OutHitCoordinates) const
 {
-	if (RayHit->hit.geomID != RTC_INVALID_GEOMETRY_ID) {
-		OutHitCoordinates = Origin + RayHit->ray.tfar * Direction;
+	if (rayHit->hit.geomID != RTC_INVALID_GEOMETRY_ID) {
+		OutHitCoordinates = origin + rayHit->ray.tfar * direction;
 		return true;
 	}
 	else
@@ -31,24 +31,24 @@ bool Ray::GetHit(glm::vec3 &OutHitCoordinates) const
 	}
 }
 
-bool Ray::GetHit() const
+bool Ray::getHit() const
 {
-	return RayHit->hit.geomID != RTC_INVALID_GEOMETRY_ID;
+	return rayHit->hit.geomID != RTC_INVALID_GEOMETRY_ID;
 }
 
-RTCRayHit* Ray::GetRayHit() const
+RTCRayHit* Ray::getRayHit() const
 {
-	return RayHit;
+	return rayHit;
 }
 
 glm::vec3 Ray::getNormal() const 
 {
-	if (RayHit->hit.geomID != RTC_INVALID_GEOMETRY_ID)
+	if (rayHit->hit.geomID != RTC_INVALID_GEOMETRY_ID)
 	{
 		return glm::normalize(glm::vec3(
-			RayHit->hit.Ng_x,
-			RayHit->hit.Ng_y,
-			RayHit->hit.Ng_z
+			rayHit->hit.Ng_x,
+			rayHit->hit.Ng_y,
+			rayHit->hit.Ng_z
 		));
 	}
 	else
