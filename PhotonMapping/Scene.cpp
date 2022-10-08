@@ -5,21 +5,12 @@
 #include "Ray.h"
 #include "Settings.h"
 #include "Device.h"
-
-#ifdef _DEBUG
 #include <iostream>
-#endif
-
-
 
 Scene::Scene()
 {
-	TheScene = rtcNewScene(Device::getInstance().getDevice());
+	scene = rtcNewScene(Device::getInstance().getDevice());
 	rtcInitIntersectContext(&context);
-
-#ifdef _DEBUG
-	std::cout << "Created Scene" << std::endl;
-#endif
 }
 
 Scene& Scene::getInstance()
@@ -30,12 +21,7 @@ Scene& Scene::getInstance()
 
 Scene::~Scene()
 {
-	rtcReleaseScene(TheScene);
-
-#ifdef _DEBUG
-	std::cout << "Deleted Scene" << std::endl;
-#endif
-
+	rtcReleaseScene(scene);
 }
 
 void Scene::saveImage(std::vector<glm::vec3> buffer)
@@ -62,36 +48,36 @@ void Scene::saveImage(std::vector<glm::vec3> buffer)
 }
 
 
-RTCScene Scene::GetScene()
+RTCScene Scene::getScene()
 {
-	return TheScene;
+	return scene;
 }
 
-void Scene::AttachModel(std::shared_ptr<Model> model)
+void Scene::attachModel(std::shared_ptr<Model> model)
 {
 	std::vector<std::shared_ptr<Mesh>> meshes = model->getMeshes();
 	for ( std::shared_ptr<Mesh> mesh : meshes)
 	{
-		int id = rtcAttachGeometry(TheScene, mesh->GetGeometry());
+		int id = rtcAttachGeometry(scene, mesh->GetGeometry());
         mesh->setGeometryId(id);
         std::cout << "id: " << id << std::endl;
 	}
 	
 }
 
-void Scene::Commit()
+void Scene::commit()
 {
-	rtcCommitScene(TheScene);
+	rtcCommitScene(scene);
 }
 
-void Scene::ThrowRay(Ray& Ray)
+void Scene::throwRay(Ray& Ray)
 {
-	rtcIntersect1(TheScene, &context, Ray.GetRayHit());
+	rtcIntersect1(scene, &context, Ray.getRayHit());
 }
 
 void Scene::addLight(std::shared_ptr<Light> light)
 {
-    Lights.push_back(light);
+    lights.push_back(light);
 }
 
 void Scene::setCamera(std::shared_ptr<Camera> camera)
@@ -109,16 +95,16 @@ void Scene::addModel(std::string objRoute, glm::vec3 position, float reflection,
 {
     std::shared_ptr<Model> model = std::make_shared<Model>(objRoute.c_str(), position);
 
-    Models.push_back(model);
+    models.push_back(model);
 
-    AttachModel(std::move(model));
+    attachModel(std::move(model));
 
-    Commit();
+    commit();
 }
 
 std::shared_ptr<Mesh> Scene::getMeshWithGeometryID(unsigned id)
 {
-    for (auto model : this->Models)
+    for (auto model : this->models)
     {
         for (auto mesh : model->getMeshes())
         {
@@ -174,7 +160,7 @@ float computeSpecularPointLightIntensity(
 	const float& lightInt, const float& specularExponent, const float& specularFactor
 ){
 	glm::vec3 R = glm::reflect(L, normal);
-	float specAmmount = glm::dot(r.Direction, R);
+	float specAmmount = glm::dot(r.direction, R);
 	if (specAmmount < 0) specAmmount = 0;
 	return pow(specAmmount, specularExponent) * specularFactor;
 }
@@ -188,13 +174,13 @@ glm::vec3 Scene::trace(Ray ray, int depth, float currentRefract)
 		return color;
 	}
 
-	ThrowRay(ray);
+	throwRay(ray);
 
 	glm::vec3 HitCoordinates;
 
-	if (ray.GetHit(HitCoordinates))
+	if (ray.getHit(HitCoordinates))
 	{
-		RTCRayHit* hit = ray.GetRayHit();
+		RTCRayHit* hit = ray.getRayHit();
 		auto mesh = getMeshWithGeometryID(hit->hit.geomID);
 		auto material = mesh->getMaterial();
 
@@ -211,10 +197,10 @@ glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int dep
 	glm::vec3 color = glm::vec3(0,0,0);
 	glm::vec3 normal = r.getNormal();
 	glm::vec3 hitPos;
-	r.GetHit(hitPos);
+	r.getHit(hitPos);
 
 
-	for (auto light : Lights)
+	for (auto light : lights)
 	{
 		/*
 		Point light
@@ -227,12 +213,12 @@ glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int dep
 			Ray shadowRay = Ray(hitPos + (normal * 0.01f), glm::normalize(L)); // Ray from hit to light source
 
 			glm::vec3 shadowHitPos;
-			ThrowRay(shadowRay);
+			throwRay(shadowRay);
 
-			if (shadowRay.GetHit(shadowHitPos))
+			if (shadowRay.getHit(shadowHitPos))
 			{
 				float opacity = 1;
-				RTCRayHit* hit = shadowRay.GetRayHit();
+				RTCRayHit* hit = shadowRay.getRayHit();
 				auto mesh = getMeshWithGeometryID(hit->hit.geomID);
 				auto hitMaterial = mesh->getMaterial();
 				opacity = hitMaterial->getOpacity();
@@ -268,8 +254,8 @@ glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int dep
 
 	if (material->getOpacity() < 1) {
 
-		glm::vec3 reflect = glm::reflect(r.Direction, normal);
-		glm::vec3 refract = glm::refract(r.Direction, normal, currentRefract / material->getRefraction());
+		glm::vec3 reflect = glm::reflect(r.direction, normal);
+		glm::vec3 refract = glm::refract(r.direction, normal, currentRefract / material->getRefraction());
 
 		Ray reflectRay(hitPos, reflect);
 		Ray refractRay(hitPos, refract);
@@ -279,7 +265,7 @@ glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int dep
 	}
 	else if (material->getReflection())
 	{
-		glm::vec3 reflect = glm::reflect(r.Direction, normal);
+		glm::vec3 reflect = glm::reflect(r.direction, normal);
 		Ray reflectRay(hitPos + (normal * 0.01f), reflect);
 		color += trace(reflectRay, depth - 1, currentRefract) * material->getReflection();
 	}

@@ -36,14 +36,14 @@ std::vector<Ray> Camera::generateRaysCamera()
 	std::vector<Ray> rays;
 	Camera::SecreenBase screenBase = screenBaseVectors();
 	float aspectRatio = ((float)Settings::height / Settings::width);
-	float scale = 2 * tanf((Settings::fov * M_PI / 360.0f) * 0.5);
+	float scale = 2 * tanf(static_cast<float>(Settings::fov * M_PI / 360.0f) * 0.5f);
 	for (int j = 0; j < Settings::height; j++)
 	{
 		for (int i = 0; i < Settings::width; i++)
 		{
 			glm::vec3 pixelPos;
-			float x = ((i / (float)Settings::width) - 0.5) * scale;
-			float y = ((j / (float)Settings::height) - 0.5) * scale * aspectRatio;
+			float x = ((i / (float)Settings::width) - 0.5f) * scale;
+			float y = ((j / (float)Settings::height) - 0.5f) * scale * aspectRatio;
 			pixelPos = screenBase.origin + screenBase.rightVector * x + screenBase.upVector * y;
 			Ray ray(this->position, glm::normalize(pixelPos - this->position));
 			rays.push_back(ray);

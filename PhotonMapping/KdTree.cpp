@@ -134,7 +134,7 @@ std::vector<int> KdTree::searchKNearest(const glm::vec3& queryPoint, int k, floa
 }
 
 
-KdTree KdTree::LoadKdTreeFromFile(const std::string& path)
+KdTree KdTree::loadKdTreeFromFile(const std::string& path)
 {
     static std::vector<Photon> photons;
 
@@ -146,7 +146,7 @@ KdTree KdTree::LoadKdTreeFromFile(const std::string& path)
         while (std::getline(file, line))
         {
             Photon p;
-            p.LoadFromString(line);
+            p.loadFromString(line);
 
             photons.push_back(p);
         }
@@ -161,7 +161,7 @@ KdTree KdTree::LoadKdTreeFromFile(const std::string& path)
     return tree;
 }
 
-void KdTree::SaveKdTreeToFile(const std::string& path)
+void KdTree::saveKdTreeToFile(const std::string& path)
 {
     std::ofstream file;
     file.open(path, std::ofstream::out | std::ofstream::trunc);

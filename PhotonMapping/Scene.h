@@ -20,11 +20,11 @@ public:
 	Scene(Scene const&) = delete;
 	void operator=(Scene const&) = delete;
 
-	RTCScene GetScene();
+	RTCScene getScene();
 
-	void AttachModel(std::shared_ptr<Model> model);
-	void Commit();
-	void ThrowRay(Ray& Ray);
+	void attachModel(std::shared_ptr<Model> model);
+	void commit();
+	void throwRay(Ray& Ray);
 	void addLight(std::shared_ptr<Light> light);
 	void setCamera(std::shared_ptr<Camera> camera);
 	std::shared_ptr<Camera> getCamera();
@@ -40,10 +40,10 @@ private:
 	Scene();
 	~Scene();
 
-	RTCScene TheScene;
+	RTCScene scene;
 	RTCIntersectContext context;
-	std::vector<std::shared_ptr<Model>> Models;
-	std::vector<std::shared_ptr<Light>> Lights;
+	std::vector<std::shared_ptr<Model>> models;
+	std::vector<std::shared_ptr<Light>> lights;
 	std::shared_ptr<Camera> camera;
 
 	glm::vec3 trace(Ray ray, int depth, float currentRefract);

@@ -5,7 +5,7 @@
 #include "Settings.h"
 #include "Scene.h"
 
-void Photon::LoadFromString(std::string photonString)
+void Photon::loadFromString(std::string photonString)
 {
 	std::vector<std::string> fields = split(photonString, ';');
     position.x = std::stof(fields[0]);
@@ -83,11 +83,11 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer(Scene& scene)
     std::vector<Ray> camRays = scene.getCamera()->generateRaysCamera();
     for (Ray camRay : camRays)
     {
-        scene.ThrowRay(camRay);
+        scene.throwRay(camRay);
 
         glm::vec3 HitCoordinates;
 
-        if (camRay.GetHit(HitCoordinates))
+        if (camRay.getHit(HitCoordinates))
         {     
             float r2;
             std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 1, r2);
@@ -107,7 +107,6 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer(Scene& scene)
         else
         {
             buffer.push_back(glm::vec3{ 0,0,0 });
-            //std::cout << "No hit" << std::endl;
         }
     }
     return buffer;

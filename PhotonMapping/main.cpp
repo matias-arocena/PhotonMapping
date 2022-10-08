@@ -23,7 +23,7 @@ int main()
 	Scene::getInstance().saveImage(buffer);
 
 #ifdef _DEBUG
-	KdTree tree1 = KdTree::LoadKdTreeFromFile("Assets/kdtreeload.txt");
+	KdTree tree1 = KdTree::loadKdTreeFromFile("Assets/kdtreeload.txt");
 
 	std::vector<Photon> photons; 
 	Photon p1;
@@ -51,6 +51,6 @@ int main()
 	KdTree tree2;
 	tree2.setPoints(&photons.data()[0], 2);
 	
-	tree2.SaveKdTreeToFile("Assets/kdtreesave.txt");
+	tree2.saveKdTreeToFile("Assets/kdtreesave.txt");
 #endif
 }
