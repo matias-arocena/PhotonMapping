@@ -15,8 +15,10 @@ class Ray;
 class Scene
 {
 public:
-	Scene();
-	~Scene();
+	static Scene& getInstance();
+
+	Scene(Scene const&) = delete;
+	void operator=(Scene const&) = delete;
 
 	RTCScene GetScene();
 
@@ -35,6 +37,8 @@ public:
 
 
 private:
+	Scene();
+	~Scene();
 
 	RTCScene TheScene;
 	RTCIntersectContext context;

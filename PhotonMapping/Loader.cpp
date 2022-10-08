@@ -7,7 +7,7 @@
 #include "Camera.h"
 
 
-void importModels(pugi::xml_node node, std::shared_ptr<Scene> scene)
+void importModels(pugi::xml_node node)
 {
 	//Models
 	for (pugi::xml_node obj : node.child("Models"))
@@ -26,13 +26,13 @@ void importModels(pugi::xml_node node, std::shared_ptr<Scene> scene)
 
 			std::string objRoute = obj.attribute("objRoute").as_string();
 
-			scene->addModel(objRoute, position, reflection, refraction);
+			Scene::getInstance().addModel(objRoute, position, reflection, refraction);
 		}
 	}
 }
 
 
-void importLights(pugi::xml_node node, std::shared_ptr<Scene> scene)
+void importLights(pugi::xml_node node)
 {
 	//Lights
 	for (pugi::xml_node obj : node.child("Lights"))
@@ -56,7 +56,7 @@ void importLights(pugi::xml_node node, std::shared_ptr<Scene> scene)
 
 			std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>(position, intensity, maximumEmittedPhotons, color);
 
-			scene->addLight(pointLight);
+			Scene::getInstance().addLight(pointLight);
 		}
 
 		if (objType.compare("TriangleLight") == 0)
@@ -88,13 +88,13 @@ void importLights(pugi::xml_node node, std::shared_ptr<Scene> scene)
 
 			std::shared_ptr<TriangleLight> triangleLight = std::make_shared<TriangleLight>(p0, p1, p2, direction, intensity, maximumEmittedPhotons, color);
 
-			scene->addLight(triangleLight);
+			Scene::getInstance().addLight(triangleLight);
 		}
 	}
 }
 
 
-void importCamera(pugi::xml_node node, std::shared_ptr<Scene> scene)
+void importCamera(pugi::xml_node node)
 {
 	// camera
 	pugi::xml_node obj = node.child("Camera");
@@ -114,10 +114,10 @@ void importCamera(pugi::xml_node node, std::shared_ptr<Scene> scene)
 
 	std::shared_ptr<Camera> camera = std::make_shared<Camera>(position, direction, up);
 
-	scene->setCamera(camera);
+	Scene::getInstance().setCamera(camera);
 }
 
-void importScene(std::shared_ptr<Scene> scene)
+void importScene()
 {
 	pugi::xml_document doc;
 
@@ -142,9 +142,9 @@ void importScene(std::shared_ptr<Scene> scene)
 
 	Settings::fov = doc.child("Scene").attribute("fov").as_int();
 
-	importModels(doc.child("Scene"), scene);
-	importLights(doc.child("Scene"), scene);
-	importCamera(doc.child("Scene"), scene);
+	importModels(doc.child("Scene"));
+	importLights(doc.child("Scene"));
+	importCamera(doc.child("Scene"));
 
 	std::cout << "Scene loaded" << std::endl;
 }

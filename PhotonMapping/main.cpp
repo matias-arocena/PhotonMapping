@@ -17,12 +17,10 @@
 
 int main()
 {
-	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+	importScene();
 
-	importScene(scene);
-
-	std::vector<glm::vec3> buffer = scene->renderScene();
-	scene->saveImage(buffer);
+	std::vector<glm::vec3> buffer = Scene::getInstance().renderScene();
+	Scene::getInstance().saveImage(buffer);
 
 #ifdef _DEBUG
 	KdTree tree1 = KdTree::LoadKdTreeFromFile("Assets/kdtreeload.txt");

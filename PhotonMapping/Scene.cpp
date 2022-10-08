@@ -22,6 +22,12 @@ Scene::Scene()
 #endif
 }
 
+Scene& Scene::getInstance()
+{
+	static Scene instance;
+	return instance;
+}
+
 Scene::~Scene()
 {
 	rtcReleaseScene(TheScene);

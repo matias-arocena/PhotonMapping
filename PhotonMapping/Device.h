@@ -7,7 +7,6 @@ class Device
 public:
 	static Device& getInstance();
 
-	~Device();
 
 	Device(Device const&) = delete;
 	void operator=(Device const&) = delete;
@@ -15,6 +14,7 @@ public:
 	RTCDevice getDevice();
 private:
 	Device();
+	~Device();
 
 	RTCDevice device;
 };
