@@ -39,18 +39,23 @@ void importLights(pugi::xml_node node)
 	for (pugi::xml_node obj : node.child("Lights"))
 	{
 		std::string objType = obj.name();
+		
+		glm::vec3 color;
+		
+		color.r = obj.attribute("colorr").as_float();
+		color.g = obj.attribute("colorg").as_float();
+		color.b = obj.attribute("colorb").as_float();
+
+		float intensity = obj.attribute("intensity").as_float();
+		int maximumEmittedPhotons = obj.attribute("maximumEmittedPhotons").as_int();
 
 		if (objType.compare("PointLight") == 0)
 		{
+
 			glm::vec3 position;
 			position.x = obj.attribute("x").as_float();
 			position.y = obj.attribute("y").as_float();
 			position.z = obj.attribute("z").as_float();
-
-			glm::vec3 color;
-			color.r = obj.attribute("colorr").as_float();
-			color.g = obj.attribute("colorg").as_float();
-			color.b = obj.attribute("colorb").as_float();
 
 			float intensity = obj.attribute("intensity").as_float();
 			int maximumEmittedPhotons = obj.attribute("maximumEmittedPhotons").as_int();
@@ -79,14 +84,6 @@ void importLights(pugi::xml_node node)
 			p2.y = obj.attribute("p2y").as_float();
 			p2.z = obj.attribute("p2z").as_float();
 
-			color.r = obj.attribute("colorr").as_float();
-			color.g = obj.attribute("colorg").as_float();
-			color.b = obj.attribute("colorb").as_float();
-
-			float intensity = obj.attribute("intensity").as_float();
-			int maximumEmittedPhotons = obj.attribute("maximumEmittedPhotons").as_int();
-
-
 			std::shared_ptr<TriangleLight> triangleLight = std::make_shared<TriangleLight>(p0, p1, p2, direction, intensity, maximumEmittedPhotons, color);
 
 			Scene::getInstance().addLight(triangleLight);
@@ -112,9 +109,9 @@ void importLights(pugi::xml_node node)
 				obj.attribute("vz").as_float(),
 			};
 
-			std::shared_ptr<SquareLight> squareLight = std::make_shared<SquareLight>(intensity, center, normal, v);
+			std::shared_ptr<SquareLight> squareLight = std::make_shared<SquareLight>(intensity, maximumEmittedPhotons, color, center, normal, v);
 
-			scene->addLight(squareLight);
+			Scene::getInstance().addLight(squareLight);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 #include "SquareLight.h"
 
-SquareLight::SquareLight(float intensity, glm::vec3 center, glm::vec3 normal, glm::vec3 v) : Light(intensity), center{ center }, normal{ glm::normalize(normal) }, v{ v } {
+SquareLight::SquareLight(float intensity, unsigned maximumEmittedPhotons, glm::vec3 color, glm::vec3 center, glm::vec3 normal, glm::vec3 v) : Light(intensity, maximumEmittedPhotons, color), center{ center }, normal{ glm::normalize(normal) }, v{ v } {
     u = glm::cross(normal, u);
 }
 

@@ -5,7 +5,7 @@
 class SquareLight : public Light
 {
 public:
-	SquareLight(float intensity, glm::vec3 center, glm::vec3 normal, glm::vec3 v);
+	SquareLight(float intensity, unsigned maximumEmittedPhotons, glm::vec3 color, glm::vec3 center, glm::vec3 normal, glm::vec3 v);
 
 	// Returns a random position of the light, could be used to throw photons or for ray tracing shading
 	glm::vec3* getRandomPositions(unsigned qty);

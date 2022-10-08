@@ -6,7 +6,6 @@
 #include "Settings.h"
 #include "Device.h"
 #include <iostream>
-#endif
 #include "SquareLight.h"
 
 Scene::Scene()
@@ -82,12 +81,13 @@ void Scene::addLight(std::shared_ptr<Light> light)
 	std::shared_ptr<SquareLight> squareLight = std::dynamic_pointer_cast<SquareLight>(light);
 	if (squareLight)
 	{
+		RTCDevice device = Device::getInstance().getDevice();
 		squareLight->createEmbreeMesh(device);
-		int id = rtcAttachGeometry(TheScene, squareLight->getGeometry());
+		int id = rtcAttachGeometry(scene, squareLight->getGeometry());
 		RTCError error = rtcGetDeviceError(device);
 		squareLight->setGeometryId(id);
 	}
-    Lights.push_back(light);
+    lights.push_back(light);
 }
 
 void Scene::setCamera(std::shared_ptr<Camera> camera)
@@ -129,7 +129,7 @@ std::shared_ptr<Mesh> Scene::getMeshWithGeometryID(unsigned id)
 
 bool Scene::getMeshWithGeometryID(unsigned id, Mesh &mesh)
 {
-	for (auto model : this->Models)
+	for (auto model : this->models)
 	{
 		for (auto msh : model->getMeshes())
 		{
@@ -242,7 +242,7 @@ glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int dep
 			throwRay(shadowRay);
 			
 			Mesh *mesh = NULL;
-			if (shadowRay.getHit(shadowHitPos) && glm::distance(hitPos, shadowHitPos) <= glm::distance(pointLight->getPosition(), shadowHitPos) && getMeshWithGeometryID(shadowRay.GetRayHit()->hit.geomID, *mesh))
+			if (shadowRay.getHit(shadowHitPos) && glm::distance(hitPos, shadowHitPos) <= glm::distance(pointLight->getPosition(), shadowHitPos) && getMeshWithGeometryID(shadowRay.getRayHit()->hit.geomID, *mesh))
 			{
 				float opacity = 1;
 				RTCRayHit* hit = shadowRay.getRayHit();
@@ -294,18 +294,16 @@ glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int dep
 		glm::vec3 reflect = glm::reflect(r.direction, normal);
 		glm::vec3 refract = glm::refract(r.direction, normal, currentRefract / material->getRefraction());
 
-		Ray reflectRay(hitPos + (r.Direction * -0.01f), reflect);
-		Ray refractRay(hitPos + (r.Direction * -0.01f), refract);
+		Ray reflectRay(hitPos + (r.direction * -0.01f), reflect);
+		Ray refractRay(hitPos + (r.direction * -0.01f), refract);
 
 		color += trace(reflectRay, depth - 1, material->getRefraction());
 		color += trace(refractRay, depth - 1, material->getRefraction());
 	}
 	else if (material->getReflection())
 	{
-		glm::vec3 reflect = glm::reflect(r.Direction, normal);
-		Ray reflectRay(hitPos + (r.Direction * -0.01f), reflect);
 		glm::vec3 reflect = glm::reflect(r.direction, normal);
-		Ray reflectRay(hitPos + (normal * 0.01f), reflect);
+		Ray reflectRay(hitPos + (r.direction * -0.01f), reflect);
 		color += trace(reflectRay, depth - 1, currentRefract) * material->getReflection();
 	}
 

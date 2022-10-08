@@ -5,7 +5,6 @@
 
 #include <string>
 #include <iostream>
-#include "Ray.h"
 #include "Scene.h"
 
 class Scene;
