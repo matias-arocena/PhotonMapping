@@ -17,16 +17,12 @@
 
 int main()
 {
-	RTCDevice device = rtcNewDevice(nullptr);
-
-	std::shared_ptr<Scene> scene = std::make_shared<Scene>(device);
+	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
 	importScene(scene);
 
 	std::vector<glm::vec3> buffer = scene->renderScene();
 	scene->saveImage(buffer);
-
-	rtcReleaseDevice(scene->device);
 
 #ifdef _DEBUG
 	KdTree tree1 = KdTree::LoadKdTreeFromFile("Assets/kdtreeload.txt");

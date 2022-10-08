@@ -161,6 +161,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Device.cpp" />
     <ClCompile Include="KdTree.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
@@ -178,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Device.h" />
     <ClInclude Include="KdTree.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />

@@ -20,7 +20,7 @@ struct Photon
 
 	friend std::ostream& operator<<(std::ostream& o, const Photon& a);
 	void LoadFromString(std::string photonString);
-	static void trace(glm::vec3 from, glm::vec3 to, glm::vec3 power);
+	static void trace(glm::vec3 lightPosition, glm::vec3 lightPhotonDirection, glm::vec3 power);
 private:
 	static std::vector<std::string> split(const std::string& s, char delim);
 };

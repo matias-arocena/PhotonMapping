@@ -9,7 +9,6 @@
 class Mesh
 {
 public:
-	Mesh(aiMesh* mesh, const aiScene* scene, RTCDevice device, glm::vec3 position);
 	Mesh(float* vertexBuffer, unsigned* indexBuffer, const RTCGeometry& geometry, std::shared_ptr<Material> material);
 
 	~Mesh();

@@ -4,6 +4,7 @@
 #include "Model.h"
 #include "Ray.h"
 #include "Settings.h"
+#include "Device.h"
 
 #ifdef _DEBUG
 #include <iostream>
@@ -11,10 +12,9 @@
 
 
 
-Scene::Scene(RTCDevice device)
+Scene::Scene()
 {
-    this->device = device;
-	TheScene = rtcNewScene(device);
+	TheScene = rtcNewScene(Device::getInstance().getDevice());
 	rtcInitIntersectContext(&context);
 
 #ifdef _DEBUG
@@ -100,7 +100,7 @@ std::shared_ptr<Camera> Scene::getCamera()
 
 void Scene::addModel(std::string objRoute, glm::vec3 position, float reflection, float refraction)
 {
-    std::shared_ptr<Model> model = std::make_shared<Model>(objRoute.c_str(), device, position);
+    std::shared_ptr<Model> model = std::make_shared<Model>(objRoute.c_str(), position);
 
     Models.push_back(model);
 
