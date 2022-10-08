@@ -5,7 +5,8 @@
 
 #include <string>
 #include <iostream>
-#include "Scene.h"
+
+class Scene;
 
 struct Photon
 {

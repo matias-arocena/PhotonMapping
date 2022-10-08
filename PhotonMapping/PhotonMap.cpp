@@ -3,19 +3,19 @@
 #include <FreeImage.h>
 #include <sstream>
 #include "Settings.h"
+#include "Scene.h"
 
 void Photon::LoadFromString(std::string photonString)
 {
 	std::vector<std::string> fields = split(photonString, ';');
-    position.x = std::atof(fields[0].c_str());
-	position.y = std::atof(fields[1].c_str());
-    position.z = std::atof(fields[2].c_str());
-    power[0] = fields[3][0];
-    power[1] = fields[4][0];
-    power[2] = fields[5][0];
-    power[3] = fields[6][0];
-    phi = fields[7][0];
-    theta = fields[8][0];
+    position.x = std::stof(fields[0]);
+	position.y = std::stof(fields[1]);
+    position.z = std::stof(fields[2]);
+    power.r = std::stof(fields[3]);
+    power.g = std::stof(fields[4]);
+    power.b = std::stof(fields[5]);
+    phi = fields[6][0];
+    theta = fields[7][0];
 
 }
 
@@ -41,10 +41,9 @@ std::ostream& operator<<(std::ostream& o, const Photon& a)
 	o << a.position.x << ";"
 	    << a.position.y << ";"
         << a.position.z << ";"
-        << a.power[0] << ";"
-        << a.power[1] << ";"
-        << a.power[2] << ";"
-        << a.power[3] << ";"
+        << a.power.r << ";"
+        << a.power.g << ";"
+        << a.power.b << ";"
         << a.phi << ";"
         << a.theta;
 
@@ -58,13 +57,13 @@ void PhotonMap::addPhoton(const Photon& p)
 
 void PhotonMap::build()
 {
-    kdtree.setPoints(photons.data(), photons.size());
+    kdtree.setPoints(photons.data(), static_cast<int>(photons.size()));
     kdtree.buildTree();
 }
 
 const int PhotonMap::getSize() const
 {
-    return photons.size();
+    return static_cast<int>(photons.size());
 }
 
 const Photon& PhotonMap::getPhoton(int i) const
@@ -81,7 +80,7 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer(Scene& scene)
 {
    std::vector<glm::vec3> buffer;
 
-    std::vector<Ray> camRays = scene.camera->generateRaysCamera();
+    std::vector<Ray> camRays = scene.getCamera()->generateRaysCamera();
     for (Ray camRay : camRays)
     {
         scene.ThrowRay(camRay);

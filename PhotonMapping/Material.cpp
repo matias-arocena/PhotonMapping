@@ -45,7 +45,7 @@ Material::Material(aiMaterial* material)
 
 	// Specular factor
 	//material->Get(AI_MATKEY_SHININESS_STRENGTH, specularFactor);
-	specularFactor = 0.4;
+	specularFactor = 0.4f;
 
 	// Ior
 	material->Get(AI_MATKEY_REFRACTI, this->refraction);

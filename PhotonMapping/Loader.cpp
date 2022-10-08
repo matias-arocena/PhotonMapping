@@ -46,16 +46,22 @@ void importLights(pugi::xml_node node, std::shared_ptr<Scene> scene)
 			position.y = obj.attribute("y").as_float();
 			position.z = obj.attribute("z").as_float();
 
-			float intensity = obj.attribute("intensity").as_float();
+			glm::vec3 color;
+			color.r = obj.attribute("colorr").as_float();
+			color.g = obj.attribute("colorg").as_float();
+			color.b = obj.attribute("colorb").as_float();
 
-			std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>(position, intensity);
+			float intensity = obj.attribute("intensity").as_float();
+			int maximumEmittedPhotons = obj.attribute("maximumEmittedPhotons").as_int();
+
+			std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>(position, intensity, maximumEmittedPhotons, color);
 
 			scene->addLight(pointLight);
 		}
 
 		if (objType.compare("TriangleLight") == 0)
 		{
-			glm::vec3 p0{ 0,0,0 }, p1{ 0,0,0 }, p2{ 0,0,0 }, direction{ 0,0,0 };
+			glm::vec3 p0{ 0,0,0 }, p1{ 0,0,0 }, p2{ 0,0,0 }, direction{ 0,0,0 }, color{0, 0, 0};
 			direction.x = obj.attribute("dirx").as_float();
 			direction.y = obj.attribute("diry").as_float();
 			direction.z = obj.attribute("dirz").as_float();
@@ -72,9 +78,15 @@ void importLights(pugi::xml_node node, std::shared_ptr<Scene> scene)
 			p2.y = obj.attribute("p2y").as_float();
 			p2.z = obj.attribute("p2z").as_float();
 
-			float intensity = obj.attribute("intensity").as_float();
+			color.r = obj.attribute("colorr").as_float();
+			color.g = obj.attribute("colorg").as_float();
+			color.b = obj.attribute("colorb").as_float();
 
-			std::shared_ptr<TriangleLight> triangleLight = std::make_shared<TriangleLight>(p0, p1, p2, direction, intensity);
+			float intensity = obj.attribute("intensity").as_float();
+			int maximumEmittedPhotons = obj.attribute("maximumEmittedPhotons").as_int();
+
+
+			std::shared_ptr<TriangleLight> triangleLight = std::make_shared<TriangleLight>(p0, p1, p2, direction, intensity, maximumEmittedPhotons, color);
 
 			scene->addLight(triangleLight);
 		}

@@ -11,7 +11,7 @@ class PointLight : public Light
 
 public:
 
-	PointLight(glm::vec3 position, float intensity);
+	PointLight(glm::vec3 position, float intensity, int maximumEmittedPhotons, glm::vec3 color);
 	~PointLight();
 
 	glm::vec3 getPosition() const;

@@ -41,9 +41,9 @@ void Scene::saveImage(std::vector<glm::vec3> buffer)
     {
         for (int i = 0; i < Settings::width; ++i)
         {
-            color.rgbRed = (buffer)[(j * Settings::width) + i].r;
-            color.rgbBlue = (buffer)[(j * Settings::width) + i].b;
-            color.rgbGreen = (buffer)[(j * Settings::width) + i].g;
+            color.rgbRed = static_cast<BYTE>((buffer)[(j * Settings::width) + i].r);
+            color.rgbBlue = static_cast<BYTE>((buffer)[(j * Settings::width) + i].b);
+            color.rgbGreen = static_cast<BYTE>((buffer)[(j * Settings::width) + i].g);
             FreeImage_SetPixelColor(bitmap, i, j, &color);
         }
     }
@@ -95,6 +95,7 @@ void Scene::setCamera(std::shared_ptr<Camera> camera)
 
 std::shared_ptr<Camera> Scene::getCamera()
 {
+	return camera;
 }
 
 
@@ -152,13 +153,13 @@ std::vector<glm::vec3> Scene::renderScene()
 
 float computePointLightIntensity(glm::vec3 L, const glm::vec3& normal, const float& pointLigntInt)
 {
-	float lightInt; // Light intensity
-	float fatt = 1 / pow(L.length(), 2); // Factor distancia entre luz y punto
+	double lightInt; // Light intensity
+	double fatt = 1 / pow(L.length(), 2); // Factor distancia entre luz y punto
 	L = glm::normalize(L);
 	lightInt = glm::max(glm::dot(normal, L), 0.f) * fatt * pointLigntInt; // pointLight->getIntensity(); // El dot product de 2 vectores normalizados da el coseno del angulo entre ellos, 50 es la intensidad
 
-	lightInt = glm::clamp(lightInt, 0.0f, 1.0f);
-	return lightInt;
+	lightInt = glm::clamp(lightInt, 0.0, 1.0);
+	return static_cast<float>(lightInt);
 }
 
 float computeSpecularPointLightIntensity(

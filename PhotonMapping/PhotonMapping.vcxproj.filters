@@ -112,5 +112,16 @@
     <Text Include="README.md">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="Assets\kdtreesave.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Assets\kdtreeload.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Assets\config.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

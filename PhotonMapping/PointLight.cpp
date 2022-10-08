@@ -1,7 +1,7 @@
 #include "PointLight.h"
 
 
-PointLight::PointLight(glm::vec3 position, float intensity):Light(intensity)
+PointLight::PointLight(glm::vec3 position, float intensity, int maximumEmittedPhotons, glm::vec3 color):Light(intensity, maximumEmittedPhotons, color)
 {
 	this->position = position;
 }
