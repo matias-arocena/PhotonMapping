@@ -6,11 +6,8 @@
 #include "Camera.h"
 #include <iostream>
 #include "Model.h"
-<<<<<<< HEAD
 #include "PhotonMap.h"
-=======
 #include "PointLight.h"
->>>>>>> 121e4c99f463a26d90cfa678e075fcf590a6fae2
 
 class Model;
 class Ray;
@@ -33,6 +30,7 @@ public:
 	void addModel(std::string objRoute, glm::vec3 position, float reflection, float refraction);
 
 	std::shared_ptr<Mesh> getMeshWithGeometryID(unsigned id);
+	bool getMeshWithGeometryID(unsigned id, Mesh& mesh);
 
 	std::vector<glm::vec3> renderScene();
 

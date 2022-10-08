@@ -57,7 +57,7 @@ Material::Material(aiMaterial* material)
 	this->diffuse = assimpColorToGlm(difColor);
 	this->specular = assimpColorToGlm(speColor);
 	this->colorTransparent = assimpColorToGlm(traColor);
-	this->reflection = 0.5f;
+	this->reflection = 0.f;
 	this->refraction = .0f;
 }
 

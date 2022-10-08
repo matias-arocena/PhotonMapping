@@ -5,6 +5,7 @@
 #include "PointLight.h"
 #include "TriangleLight.h"
 #include "Camera.h"
+#include "SquareLight.h"
 
 
 void importModels(pugi::xml_node node, std::shared_ptr<Scene> scene)
@@ -77,6 +78,31 @@ void importLights(pugi::xml_node node, std::shared_ptr<Scene> scene)
 			std::shared_ptr<TriangleLight> triangleLight = std::make_shared<TriangleLight>(p0, p1, p2, direction, intensity);
 
 			scene->addLight(triangleLight);
+		}
+
+		if (objType.compare("SquareLight") == 0)
+		{
+			float intensity = obj.attribute("intensity").as_float();
+
+			glm::vec3 center = {
+				obj.attribute("cenx").as_float(),
+				obj.attribute("ceny").as_float(),
+				obj.attribute("cenz").as_float(),
+			};
+			glm::vec3 normal = {
+				obj.attribute("norx").as_float(),
+				obj.attribute("nory").as_float(),
+				obj.attribute("norz").as_float(),
+			}; 
+			glm::vec3 v = {
+				obj.attribute("vx").as_float(),
+				obj.attribute("vy").as_float(),
+				obj.attribute("vz").as_float(),
+			};
+
+			std::shared_ptr<SquareLight> squareLight = std::make_shared<SquareLight>(intensity, center, normal, v);
+
+			scene->addLight(squareLight);
 		}
 	}
 }
