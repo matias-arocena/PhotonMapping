@@ -4,6 +4,8 @@
 #include <vector>
 #include "Ray.h"
 
+#include <memory>
+
 class Camera
 {
 
@@ -23,5 +25,5 @@ public:
 	};
 	SecreenBase screenBaseVectors();
 
-	std::vector<Ray> generateRaysCamera();
+	std::vector<std::shared_ptr<Ray>> generateRaysCamera();
 };

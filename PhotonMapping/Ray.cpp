@@ -17,6 +17,7 @@ Ray::Ray(glm::vec3 org, glm::vec3 dir) : origin{org}, direction{dir}
 
 Ray::~Ray()
 {
+	delete rayHit;
 }
 
 bool Ray::getHit(glm::vec3 &OutHitCoordinates) const

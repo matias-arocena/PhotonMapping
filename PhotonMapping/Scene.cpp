@@ -63,7 +63,7 @@ void Scene::attachModel(std::shared_ptr<Model> model)
 		meshes.push_back(mesh);
 		rtcAttachGeometryByID(scene, mesh->getGeometry(), id);
         mesh->setGeometryId(id);
-        std::cout << "id: " << id << std::endl;
+        std::cout << "Geometry id: " << id << std::endl;
 	}
 	
 }
@@ -73,9 +73,9 @@ void Scene::commit()
 	rtcCommitScene(scene);
 }
 
-void Scene::throwRay(Ray& Ray)
+void Scene::throwRay(std::shared_ptr<Ray> ray)
 {
-	rtcIntersect1(scene, &context, Ray.getRayHit());
+	rtcIntersect1(scene, &context, ray->getRayHit());
 }
 
 void Scene::addLight(std::shared_ptr<Light> light)
@@ -90,10 +90,10 @@ void Scene::addLight(std::shared_ptr<Light> light)
 		rtcAttachGeometryByID(scene, squareLight->getGeometry(), id);
 		squareLight->setGeometryId(id);
 		
-
-		RTCError error = rtcGetDeviceError(device);
+		std::cout << "Light Geometry id: " << id << std::endl;
 	}
     lights.push_back(light);
+	commit();
 }
 
 void Scene::setCamera(std::shared_ptr<Camera> camera)
@@ -118,38 +118,6 @@ void Scene::addModel(std::string objRoute, glm::vec3 position, float reflection,
     commit();
 }
 
-//std::shared_ptr<Mesh> Scene::getMeshWithGeometryID(unsigned id)
-//{
-//    for (auto model : this->models)
-//    {
-//        for (auto mesh : model->getMeshes())
-//        {
-//            if (mesh->getGeometryId() == id)
-//            {
-//                return mesh;
-//            }
-//        }
-//    }
-//    return NULL;
-//}
-//
-//bool Scene::getMeshWithGeometryID(unsigned id, std::shared_ptr<Mesh> mesh)
-//{
-//	for (auto model : this->models)
-//	{
-//		for (auto msh : model->getMeshes())
-//		{
-//			if (msh->getGeometryId() == id)
-//			{
-//				mesh = msh;
-//				return true;
-//			}
-//		}
-//	}
-//	return false;
-//}
-
-
 
 glm::vec3 colorToRgb(const glm::vec3& color)
 {
@@ -157,15 +125,12 @@ glm::vec3 colorToRgb(const glm::vec3& color)
 }
 
 
-
-
-
 std::vector<glm::vec3> Scene::renderScene()
 {
     std::vector<glm::vec3> buffer;
 
-    std::vector<Ray> camRays = camera->generateRaysCamera();
-    for (Ray camRay : camRays)
+    std::vector<std::shared_ptr<Ray>> camRays = camera->generateRaysCamera();
+    for (auto camRay : camRays)
     {
 
         buffer.push_back(colorToRgb(trace(camRay, Settings::maxDepth, 1.0f)));
@@ -188,17 +153,17 @@ float computePointLightIntensity(glm::vec3 L, const glm::vec3& normal, const flo
 
 float computeSpecularPointLightIntensity(
 	const glm::vec3& L, const glm::vec3& normal, 
-	const Ray& r,
+	std::shared_ptr<Ray> r,
 	const float& lightInt, const float& specularExponent, const float& specularFactor
 ){
 	glm::vec3 R = glm::reflect(L, normal);
-	float specAmmount = glm::dot(r.direction, R);
+	float specAmmount = glm::dot(r->direction, R);
 	if (specAmmount < 0) specAmmount = 0;
 	return pow(specAmmount, specularExponent) * specularFactor * lightInt;
 }
 
 
-glm::vec3 Scene::trace(Ray ray, int depth, float currentRefract)
+glm::vec3 Scene::trace(std::shared_ptr<Ray> ray, const int &depth, const float &currentRefract)
 {
 	glm::vec3 color = Settings::backgroundColor; 
 	if (depth <= 0)
@@ -208,17 +173,20 @@ glm::vec3 Scene::trace(Ray ray, int depth, float currentRefract)
 
 	throwRay(ray);
 
+	auto ge = rtcGetGeometry(scene, 1);
+
 	glm::vec3 HitCoordinates;
 
-	if (ray.getHit(HitCoordinates))
+	if (ray->getHit(HitCoordinates))
 	{
-		RTCRayHit* hit = ray.getRayHit();
-		if (hit->hit.geomID > meshes.size())
+		RTCRayHit* hit = ray->getRayHit();
+		if (hit->hit.geomID >= meshes.size())
 		{
 			std::cout << "se rompe" << std::endl;
 		}
 		std::shared_ptr<Mesh> mesh = NULL;
 		std::shared_ptr<SquareLight> squareLight = NULL;
+
 		if (hit->hit.geomID < meshes.size())
 		{
 			mesh = meshes[hit->hit.geomID];
@@ -242,31 +210,31 @@ glm::vec3 Scene::trace(Ray ray, int depth, float currentRefract)
 }
 
 
-glm::vec3 Scene::computeShadow(glm::vec3 lightPosition, glm::vec3 normal, glm::vec3 hitPos, float intensity, std::shared_ptr<Material> material, Ray r, int lightId)
+glm::vec3 Scene::computeShadow(const glm::vec3 &lightPosition, const glm::vec3 &normal, const glm::vec3 &hitPos, const float &intensity, std::shared_ptr<Material> material, std::shared_ptr<Ray> r, const int &lightId)
 {
 	glm::vec3 color = Settings::backgroundColor;
 	glm::vec3 L = lightPosition - hitPos;
 
-	Ray shadowRay = Ray(hitPos + (normal * 0.01f), glm::normalize(L)); // Ray from hit to light source
+	auto shadowRay = std::make_shared<Ray>(hitPos + (normal * 0.01f), glm::normalize(L)); // Ray from hit to light source
 
 	glm::vec3 shadowHitPos;
 	throwRay(shadowRay);
 
 	std::shared_ptr<Mesh> mesh = NULL;
 	std::shared_ptr<SquareLight> squareLight = NULL;
-	if (shadowRay.getHit(shadowHitPos) && shadowRay.getRayHit()->hit.geomID < meshes.size())
+	if (shadowRay->getHit(shadowHitPos) && shadowRay->getRayHit()->hit.geomID < meshes.size())
 	{
-		mesh = meshes[shadowRay.getRayHit()->hit.geomID];
+		mesh = meshes[shadowRay->getRayHit()->hit.geomID];
 		squareLight = std::dynamic_pointer_cast<SquareLight>(mesh);
 	}
 
-	if (shadowRay.getHit(shadowHitPos) && 
+	if (shadowRay->getHit(shadowHitPos) && 
 		glm::distance(hitPos, shadowHitPos) <= glm::distance(lightPosition, shadowHitPos) && 
 		squareLight == NULL && 
-		shadowRay.getRayHit()->hit.geomID != lightId)
+		shadowRay->getRayHit()->hit.geomID != lightId)
 	{
 		float opacity = 1;
-		RTCRayHit* hit = shadowRay.getRayHit();
+		RTCRayHit* hit = shadowRay->getRayHit();
 		auto hitMaterial = mesh->getMaterial();
 		opacity = hitMaterial->getOpacity();
 
@@ -285,7 +253,7 @@ glm::vec3 Scene::computeShadow(glm::vec3 lightPosition, glm::vec3 normal, glm::v
 			color = (material->getDiffuse() * lightInt) + specInt;
 		}
 	}
-	else if (squareLight == NULL || shadowRay.getRayHit()->hit.geomID == lightId)
+	else if (squareLight == NULL || shadowRay->getRayHit()->hit.geomID == lightId)
 	{
 		// Diffuse Light intensity
 		float lightInt = computePointLightIntensity(L, normal, intensity);
@@ -302,13 +270,12 @@ glm::vec3 Scene::computeShadow(glm::vec3 lightPosition, glm::vec3 normal, glm::v
 
 
 
-glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int depth, float currentRefract) {
+glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> material, int depth, float currentRefract) {
 	// Ambient light
 	glm::vec3 color = Settings::backgroundColor;
-	glm::vec3 normal = r.getNormal();
+	glm::vec3 normal = r->getNormal();
 	glm::vec3 hitPos;
-	r.getHit(hitPos);
-
+	r->getHit(hitPos);
 
 	for (auto light : lights)
 	{
@@ -337,64 +304,22 @@ glm::vec3 Scene::shade(const Ray& r, std::shared_ptr<Material> material, int dep
 
 	if (material->getOpacity() < 1) {
 
-		glm::vec3 reflect = glm::reflect(r.direction, normal);
-		glm::vec3 refract = glm::refract(r.direction, normal, currentRefract / material->getRefraction());
+		glm::vec3 reflect = glm::reflect(r->direction, normal);
+		glm::vec3 refract = glm::refract(r->direction, normal, currentRefract / material->getRefraction());
 
-		Ray reflectRay(hitPos + (r.direction * -0.01f), reflect);
-		Ray refractRay(hitPos + (r.direction * -0.01f), refract);
+		auto reflectRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), reflect);
+		auto refractRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), refract);
 
 		color += trace(reflectRay, depth - 1, material->getRefraction());
 		color += trace(refractRay, depth - 1, material->getRefraction());
 	}
 	else if (material->getReflection())
 	{
-		glm::vec3 reflect = glm::reflect(r.direction, normal);
-		Ray reflectRay(hitPos + (r.direction * -0.01f), reflect);
+		glm::vec3 reflect = glm::reflect(r->direction, normal);
+		auto reflectRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), reflect);
 		color += trace(reflectRay, depth - 1, currentRefract) * material->getReflection();
 	}
 
-	/*
-	double D_N = dot(r.d, p->normal);
-	if (profundidad > 0) {
-		
-			Se computa la reflectividad del objeto
-		
-		if (p->material->Kr > 0) {
-			vec3 dRefl = r.d - (p->normal * 2 * D_N);
-			Ray refl(p->point, dRefl);
-			refl.o += refl.d * 0.0001;
-			color += traza(refl, profundidad - 1, COLOR_R) * p->material->Kr;
-		}
-
-		
-			Se computa la refracción del objeto
-		
-		if (p->material->Kt > 0) {
-			double cosi = D_N;
-			if (D_N > 1) D_N = 1;
-			if (D_N < -1) D_N = -1;
-			double etai = 1, etat = p->material->Ir;
-			vec3 n = p->normal;
-			if (cosi < 0) { cosi = -cosi; }
-			else { std::swap(etai, etat); n = vec3(0, 0, 0) - p->normal; }
-			double eta = etai / etat;
-			double k = 1 - eta * eta * (1 - cosi * cosi);
-
-			if (k >= 0) {
-				vec3 refDir = ((r.d * eta) + (n * (eta * cosi - sqrtf(k))));
-				Ray refraccion(p->point, refDir);
-				refraccion.o += refDir * 0.001;
-				color += traza(refraccion, profundidad - 1, COLOR_R) * p->material->Kt;
-			}
-		}
-	}
-
-	if (color.getX() > 1) color.x = 1;
-	if (color.getY() > 1) color.y = 1;
-	if (color.getZ() > 1) color.z = 1;
-	delete p;
-
-	*/
 	return glm::clamp(color, glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
 }
 

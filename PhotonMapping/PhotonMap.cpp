@@ -80,14 +80,14 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer(Scene& scene)
 {
    std::vector<glm::vec3> buffer;
 
-    std::vector<Ray> camRays = scene.getCamera()->generateRaysCamera();
-    for (Ray camRay : camRays)
+    std::vector<std::shared_ptr<Ray>> camRays = scene.getCamera()->generateRaysCamera();
+    for (auto camRay : camRays)
     {
         scene.throwRay(camRay);
 
         glm::vec3 HitCoordinates;
 
-        if (camRay.getHit(HitCoordinates))
+        if (camRay->getHit(HitCoordinates))
         {     
             float r2;
             std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 1, r2);

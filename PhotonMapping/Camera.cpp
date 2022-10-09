@@ -3,7 +3,6 @@
 #include "Settings.h"
 #include <math.h>
 
-
 Camera::Camera(glm::vec3 position, glm::vec3 direction, glm::vec3 upVector)
 {
 	this->position = position;
@@ -31,9 +30,9 @@ Camera::SecreenBase Camera::screenBaseVectors()
 	return { screenOrigin, upVector, rightVector };
 }
 
-std::vector<Ray> Camera::generateRaysCamera()
+std::vector<std::shared_ptr<Ray>> Camera::generateRaysCamera()
 {
-	std::vector<Ray> rays;
+	std::vector<std::shared_ptr<Ray>> rays;
 	Camera::SecreenBase screenBase = screenBaseVectors();
 	float aspectRatio = ((float)Settings::height / Settings::width);
 	float scale = 2 * tanf(static_cast<float>(Settings::fov * M_PI / 360.0f) * 0.5f);
@@ -45,7 +44,7 @@ std::vector<Ray> Camera::generateRaysCamera()
 			float x = ((i / (float)Settings::width) - 0.5f) * scale;
 			float y = ((j / (float)Settings::height) - 0.5f) * scale * aspectRatio;
 			pixelPos = screenBase.origin + screenBase.rightVector * x + screenBase.upVector * y;
-			Ray ray(this->position, glm::normalize(pixelPos - this->position));
+			auto ray = std::make_shared<Ray>(this->position, glm::normalize(pixelPos - this->position));
 			rays.push_back(ray);
 		}
 	}

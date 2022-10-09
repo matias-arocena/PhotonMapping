@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<Scene resx="1920" resy="1080" maxDepth="3" bgColorR="0" bgColorG="0" bgColorB="0" fov="120" smoothness="20">
+<Scene resx="600" resy="600" maxDepth="3" bgColorR="0" bgColorG="0" bgColorB="0" fov="120" smoothness="16">
     <Models>
         <Model posx="0" posy="0" posz="0" objRoute="Assets/caja.obj"/>
     </Models>
@@ -7,10 +7,20 @@
 		<PointLright x="-.5" y="0" z="0" intensity="4"/>
 		<PointLright x=".5" y="0" z="0" intensity="4"/>
 		<SquareLight
-			cenx="0" ceny="0.9" cenz="0"
+			cenx="0" ceny="2" cenz="0"
 			norx="0" nory="-1" norz="0"
-			vx="0.3" vy="0" vz="0"
-			intensity="10"
+			vx="1" vy="0" vz="0"
+			intensity="30"
+			colorr="255"
+			colorg="255"
+			colorb="255"
+		/>
+
+		<SquareLight
+			cenx="0" ceny="0" cenz=".5"
+			norx="0" nory="0" norz="1"
+			vx="1" vy="0" vz="0"
+			intensity="8"
 			colorr="255"
 			colorg="255"
 			colorb="255"

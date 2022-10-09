@@ -24,7 +24,7 @@ public:
 
 	void attachModel(std::shared_ptr<Model> model);
 	void commit();
-	void throwRay(Ray& Ray);
+	void throwRay(std::shared_ptr<Ray> ray);
 	void addLight(std::shared_ptr<Light> light);
 	void setCamera(std::shared_ptr<Camera> camera);
 	std::shared_ptr<Camera> getCamera();
@@ -48,8 +48,8 @@ private:
 	std::shared_ptr<Camera> camera;
 	std::vector<std::shared_ptr<Mesh>> meshes;
 
-	glm::vec3 trace(Ray ray, int depth, float currentRefract);
-	glm::vec3 shade(const Ray& r, std::shared_ptr<Material> material, int depth, float currentRefract);
-	glm::vec3 computeShadow(glm::vec3 position, glm::vec3 normal, glm::vec3 hitPos, float intensity, std::shared_ptr<Material> material, Ray r, int lightId);
+	glm::vec3 trace(std::shared_ptr<Ray> ray, const int& depth, const float& currentRefract);
+	glm::vec3 shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> material, int depth, float currentRefract);
+	glm::vec3 computeShadow(const glm::vec3& lightPosition, const glm::vec3& normal, const glm::vec3& hitPos, const float& intensity, std::shared_ptr<Material> material, std::shared_ptr<Ray> r, const int& lightId);
 };
 
