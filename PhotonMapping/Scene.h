@@ -28,12 +28,13 @@ public:
 	void addLight(std::shared_ptr<Light> light);
 	void setCamera(std::shared_ptr<Camera> camera);
 	std::shared_ptr<Camera> getCamera();
-	void saveImage(std::vector<glm::vec3> buffer);
+	void saveImage(std::vector<glm::vec3> buffer, std::string path);
 	void addModel(std::string objRoute, glm::vec3 position, float reflection, float refraction);
 
-	//std::shared_ptr<Mesh> getMeshWithGeometryID(unsigned id);
+	std::shared_ptr<Mesh> getMeshWithGeometryID(unsigned id);
 	//bool getMeshWithGeometryID(unsigned id, std::shared_ptr<Mesh> mesh);
 
+	std::shared_ptr<PhotonMap> photonMapping();
 	std::vector<glm::vec3> renderScene();
 
 
@@ -47,6 +48,7 @@ private:
 	std::vector<std::shared_ptr<Light>> lights;
 	std::shared_ptr<Camera> camera;
 	std::vector<std::shared_ptr<Mesh>> meshes;
+	std::shared_ptr<PhotonMap> global; 
 
 	glm::vec3 trace(std::shared_ptr<Ray> ray, const int& depth, const float& currentRefract);
 	glm::vec3 shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> material, int depth, float currentRefract);

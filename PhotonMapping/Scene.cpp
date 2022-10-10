@@ -25,7 +25,7 @@ Scene::~Scene()
 	rtcReleaseScene(scene);
 }
 
-void Scene::saveImage(std::vector<glm::vec3> buffer)
+void Scene::saveImage(std::vector<glm::vec3> buffer, std::string path)
 {
     FreeImage_Initialise();
     FIBITMAP* bitmap = FreeImage_Allocate(Settings::width, Settings::height, 24);
@@ -41,10 +41,10 @@ void Scene::saveImage(std::vector<glm::vec3> buffer)
         }
     }
 
-    if (FreeImage_Save(FIF_PNG, bitmap, "imagen_prueba1.png", 0))
+    if (FreeImage_Save(FIF_PNG, bitmap, path.c_str(), 0))
     {
-        std::cout << "Image " << "imagen_prueba1.png" << " saved" << std::endl;
-    }
+        std::cout << "Image " << path << " saved" << std::endl;
+	}
     FreeImage_DeInitialise();
 }
 
@@ -118,12 +118,46 @@ void Scene::addModel(std::string objRoute, glm::vec3 position, float reflection,
     commit();
 }
 
+std::shared_ptr<Mesh> Scene::getMeshWithGeometryID(unsigned id)
+{
+	if (id < meshes.size())
+	{
+		return meshes[id];
+	} 
+	else
+	{
+		return nullptr;
+	}
+}
+
 
 glm::vec3 colorToRgb(const glm::vec3& color)
 {
     return glm::clamp(glm::vec3(color.r * 255, color.g * 255, color.b * 255), glm::vec3(0, 0, 0), glm::vec3(255, 255, 255));
 }
 
+
+std::shared_ptr<PhotonMap> Scene::photonMapping()
+{
+	std::shared_ptr<PhotonMap> photonMap = std::make_shared<PhotonMap>();
+	float globalIntensity = 0;
+
+	for (auto light : lights)
+	{
+		globalIntensity += light->getIntensity();
+	}
+
+	for (auto light : lights)
+	{
+		light->setPhotonQuantity((light->getIntensity() / globalIntensity) * Settings::photonQuantity);
+		light->emitPhotons(photonMap);
+		photonMap->build();
+	}
+
+	global = photonMap;
+
+	return photonMap;
+}
 
 std::vector<glm::vec3> Scene::renderScene()
 {
@@ -172,8 +206,6 @@ glm::vec3 Scene::trace(std::shared_ptr<Ray> ray, const int &depth, const float &
 	}
 
 	throwRay(ray);
-
-	auto ge = rtcGetGeometry(scene, 1);
 
 	glm::vec3 HitCoordinates;
 
@@ -318,6 +350,16 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 		glm::vec3 reflect = glm::reflect(r->direction, normal);
 		auto reflectRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), reflect);
 		color += trace(reflectRay, depth - 1, currentRefract) * material->getReflection();
+	}
+
+	float r2;
+	std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 20, r2);
+	if (photonIndices.size() > 0)
+	{
+		for (int photonIndex : photonIndices)
+		{
+			color += global->getPhoton(photonIndex)->power;
+		}
 	}
 
 	return glm::clamp(color, glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));

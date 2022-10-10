@@ -1,33 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<Scene resx="600" resy="600" maxDepth="3" bgColorR="0" bgColorG="0" bgColorB="0" fov="120" smoothness="16">
+<Scene resx="600" resy="600" maxDepth="3" bgColorR="0" bgColorG="0" bgColorB="0" fov="120" smoothness="4">
     <Models>
         <Model posx="0" posy="0" posz="0" objRoute="Assets/caja.obj"/>
     </Models>
     <Lights>
-		<PointLright x="-.5" y="0" z="0" intensity="4"/>
-		<PointLright x=".5" y="0" z="0" intensity="4"/>
-		<SquareLight
-			cenx="0" ceny="2" cenz="0"
-			norx="0" nory="-1" norz="0"
-			vx="1" vy="0" vz="0"
-			intensity="30"
-			colorr="255"
-			colorg="255"
-			colorb="255"
-		/>
-
-		<SquareLight
-			cenx="0" ceny="0" cenz=".5"
+		<PointLight x="-.5" y="0" z="0" intensity="4" colorr="255" colorg="255" colorb="255"/>
+		<PointLright x=".5" y="0" z="0" intensity="4" colorr="255" colorg="255" colorb="255"/>
+    <!--SquareLight
+			cenx="0" ceny="0" cenz="-5"
 			norx="0" nory="0" norz="1"
 			vx="1" vy="0" vz="0"
-			intensity="8"
+			intensity="20"
 			colorr="255"
 			colorg="255"
 			colorb="255"
-		/>
-		<PointLright x="0" y="0" z="-10" intensity="10"/>
-        <PointLright x="4.9" y="4.9" z="4.9" intensity="3" maximumEmittedPhotons="10000" colorr="255" colorg="255" colorb="255" />
-        <PointLright x="1.0" y="-10" z="-1" intensity="10" maximumEmittedPhotons="10000" colorr="255" colorg="255" colorb="255" />
+		/-->
+      <!--SquareLight
+			cenx="0" ceny="0.99" cenz="0"
+			norx="0" nory="-1" norz="0"
+			vx="0.3" vy="0" vz="0"
+			intensity="10"
+			colorr="255"
+			colorg="255"
+			colorb="255"
+		/-->
+
+
+      <!--PointLight x="0" y="0" z="0" intensity="10"/-->
+      <!--PointLight x="4.9" y="4.9" z="4.9" intensity="3" maximumEmittedPhotons="10000" colorr="255" colorg="255" colorb="255" />
+      <PointLight x="1.0" y="-10" z="-1" intensity="10" maximumEmittedPhotons="10000" colorr="255" colorg="255" colorb="255" /-->
     </Lights>
-    <Camera x="0" y="0" z="-5" upx="0" upy="1" upz="0" dirx="0" diry="0" dirz="1"/>
+    <Camera x="0" y="0" z="-4" upx="0" upy="1" upz="0" dirx="0" diry="0" dirz="1"/>
 </Scene>

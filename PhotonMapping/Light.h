@@ -1,7 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <memory>
 
-
+class PhotonMap;
 class Light
 {
 
@@ -12,12 +13,13 @@ private:
 
 public:
 	Light(float intensity, int maximumEmittedPhotons, glm::vec3 color);
+	void setPhotonQuantity(int quantity);
 	float getIntensity();
-	void emitPhotons();
+	void emitPhotons(std::shared_ptr<PhotonMap> photonMap);
 	virtual ~Light();
 	glm::vec3 getColor();
 
-private:
+protected:
 	virtual glm::vec3 getPhotonDirection() const;
 	virtual glm::vec3 getPosition() const;
 };

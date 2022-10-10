@@ -17,6 +17,9 @@ public:
 	void createEmbreeMesh(RTCDevice device);
 
 private:
+	virtual glm::vec3 getPosition() const override;
+	virtual glm::vec3 getPhotonDirection() const override;
+
 	glm::vec3 center;
 	glm::vec3 normal;
 	glm::vec3 v, u;

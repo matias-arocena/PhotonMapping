@@ -1,5 +1,9 @@
 #include "SquareLight.h"
 
+#include <random>
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 SquareLight::SquareLight(float intensity, unsigned maximumEmittedPhotons, glm::vec3 color, glm::vec3 center, glm::vec3 normal, glm::vec3 v) : Light(intensity, maximumEmittedPhotons, color), center{ center }, normal{ glm::normalize(normal) }, v{ v } {
     u = glm::cross(normal, u);
 }
@@ -33,6 +37,29 @@ void SquareLight::createEmbreeMesh(RTCDevice device)
     rtcCommitGeometry(geometry);
 }
 
+glm::vec3 SquareLight::getPosition() const
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float>dist(-1.f, 1.f);
+
+    float v_rand = dist(gen);
+	float u_rand = dist(gen);
+    return center + v * v_rand + u * u_rand;
+}
+
+glm::vec3 SquareLight::getPhotonDirection() const
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<int>dist(0, 255);
+
+	int rand1 = dist(gen);
+	int rand2 = dist(gen) % 128;
+    return glm::normalize(glm::vec3(normal.x + cos(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), normal.y + sin(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), //direccion
+        normal.z + cos(rand2 * (1. / 256.) * M_PI)));
+}
+
 glm::vec3 SquareLight::getNormal()
 {
     return normal;
@@ -42,14 +69,11 @@ std::vector<glm::vec3> SquareLight::getRandomPositions(unsigned rowQty)
 {
     std::vector<glm::vec3> points;
 
-    float div = 2.f / RAND_MAX;
     for (unsigned i = 1; i < rowQty - 1; i++)
     {
         for (unsigned j = 1; j < rowQty - 1; j++)
         {
-            float v_rand = (1 - rand() * div); // -1 .. 1
-            float u_rand = (1 - rand() * div); // -1 .. 1
-            points.push_back(center + v * v_rand + u * u_rand);
+            points.push_back(getPosition());
         }
     }
 

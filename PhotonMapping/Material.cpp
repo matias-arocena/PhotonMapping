@@ -14,6 +14,7 @@ Material::Material(glm::vec3 diffuse, glm::vec3 specular, glm::vec3 ambient, glm
 	this->specularExponent = specularExponent;
 	this->specularFactor = specularFactor;
 	this->colorTransparent = colorTransparent;
+	this->diffuseCoefficient = diffuse;
 }
 
 glm::vec3 assimpColorToGlm(const aiColor3D &color)
@@ -59,6 +60,9 @@ Material::Material(aiMaterial* material)
 	this->colorTransparent = assimpColorToGlm(traColor);
 	this->reflection = 0.f;
 	this->refraction = .0f;
+
+	this->diffuseCoefficient = this->diffuse;
+	this->specularCoefficient = glm::vec3(0, 0, 0);
 }
 
 glm::vec3 Material::getDiffuse()
@@ -104,4 +108,21 @@ float Material::getSpecularExponent()
 float Material::getSpecularFactor()
 {
 	return this->specularFactor;
+}
+
+// Despues se ve lo de arriba
+
+glm::vec3 Material::getDiffuseCoefficient()
+{
+	return diffuseCoefficient;
+}
+
+glm::vec3 Material::getSpecularCoefficient()
+{
+	return specularCoefficient;
+}
+
+glm::vec3 Material::getTransmissionCoefficient()
+{
+	return transmissionCoefficient;
 }

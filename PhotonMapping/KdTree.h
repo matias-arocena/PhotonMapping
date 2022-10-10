@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include <queue>
 #include <string>
 #include "glm/glm.hpp"
@@ -20,17 +21,18 @@ private:
 	typedef std::priority_queue<std::pair<float, int>> KNNQueue;
 
 	std::vector<Node> nodes;  // array of tree nodes
-	const Photon* points;     // pointer to array of points
-	int nPoints;              // number of points
+	std::vector<std::shared_ptr<Photon>> points;     // pointer to array of points
 
-	static float distance2(const glm::vec3& p1, const Photon& p2);
+	static float distance2(const glm::vec3& p1, std::shared_ptr<Photon> p2);
 	void buildNode(int* indices, int n_points, int depth);
 	void searchKNearestNode(int nodeIdx, const glm::vec3& queryPoint, int k, KNNQueue& queue) const;
+	void searchKNearestNode(int nodeIdx, const glm::vec3& queryPoint, float radius, KNNQueue& queue) const;
 public:
-	KdTree() : nPoints{ 0 }, points{ nullptr } {}
-	void setPoints(const Photon* points, int nPoints);
+	KdTree(){}
+	void setPoints(std::vector<std::shared_ptr<Photon>> points);
 	void buildTree();
 	std::vector<int> searchKNearest(const glm::vec3& queryPoint, int k, float& maxDist2) const;
+	std::vector<int> searchKNearest(const glm::vec3& queryPoint, float radius, float& maxDist2) const;
 
 	static KdTree loadKdTreeFromFile(const std::string& path);
 	void saveKdTreeToFile(const std::string& path);

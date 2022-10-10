@@ -20,8 +20,7 @@ public:
 	std::shared_ptr<Material> getMaterial();
 
 	// void LoadGeometry()
-
-
+	
 protected:
 	RTCGeometry geometry;
 	float* vertexBuffer;
