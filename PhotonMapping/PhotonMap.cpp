@@ -5,6 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include "Random.h"
 #include "SquareLight.h"
 #include "Settings.h"
 #include "Scene.h"
@@ -69,13 +70,7 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
         } 
         else
         {
-			std::random_device rd;
-			std::mt19937 gen(rd());
-			std::uniform_real_distribution<float>realDist(0.f, 1.f);
-            std::uniform_int_distribution<int>intDist(0, 255);
-			
-
-            ReflectionType type = photon->russianRoulete(material, realDist(gen));
+            ReflectionType type = photon->russianRoulete(material, Random::getRussianRouletteValue());
 			if (type == ReflectionType::Diffuse)
 			{
 
@@ -84,11 +79,10 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
 					photonMap->addPhoton(photon);
                 }
                 
-                int rand1 = intDist(gen);
-				int rand2 = intDist(gen) % 128;
-				glm::vec3 reflectedDirection = glm::normalize(glm::vec3(normal.x + cos(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), normal.y + sin(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), //direccion
+                int rand1 = Random::getValueFrom0To255();
+                int rand2 = Random::getValueFrom0To255() % 128;
+                glm::vec3 reflectedDirection = glm::normalize(glm::vec3(normal.x + cos(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), normal.y + sin(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), //direccion
 					normal.z + cos(rand2 * (1. / 256.) * M_PI)));
-
 
                 Photon::trace(photon->position, reflectedDirection, photon->power * material->getDiffuse(), depth + 1, currentRefract, photonMap);
 			}

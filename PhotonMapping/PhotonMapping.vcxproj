@@ -170,6 +170,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="PhotonMap.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="Random.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Settings.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="PhotonMap.h" />
     <ClInclude Include="PointLight.h" />
+    <ClInclude Include="Random.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Settings.h" />

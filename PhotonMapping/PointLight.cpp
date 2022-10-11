@@ -1,19 +1,15 @@
 #include "PointLight.h"
-#include <random>
+#include "Random.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 
 glm::vec3 PointLight::getPhotonDirection() const
 {
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float>dist(-1.f, 1.f);
-
 	glm::vec3 direction;
 	do {
-		direction.x = dist(gen);
-		direction.y = dist(gen);
-		direction.z = dist(gen);
+		direction.x = Random::getValueFromMinus1To1();
+		direction.y = Random::getValueFromMinus1To1();
+		direction.z = Random::getValueFromMinus1To1();
 	} while (direction.x * direction.x + direction.y * direction.y + direction.z * direction.z > 1);
 
 	return direction;

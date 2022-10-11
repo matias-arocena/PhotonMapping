@@ -1,6 +1,6 @@
 #include "SquareLight.h"
 
-#include <random>
+#include "Random.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -39,23 +39,15 @@ void SquareLight::createEmbreeMesh(RTCDevice device)
 
 glm::vec3 SquareLight::getPosition() const
 {
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float>dist(-1.f, 1.f);
-
-    float v_rand = dist(gen);
-	float u_rand = dist(gen);
+    float v_rand = Random::getValueFromMinus1To1();
+    float u_rand = Random::getValueFromMinus1To1();
     return center + v * v_rand + u * u_rand;
 }
 
 glm::vec3 SquareLight::getPhotonDirection() const
 {
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<int>dist(0, 255);
-
-	int rand1 = dist(gen);
-	int rand2 = dist(gen) % 128;
+    int rand1 = Random::getValueFrom0To255();
+	int rand2 = Random::getValueFrom0To255() % 128;
     return glm::normalize(glm::vec3(normal.x + cos(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), normal.y + sin(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), //direccion
         normal.z + cos(rand2 * (1. / 256.) * M_PI)));
 }

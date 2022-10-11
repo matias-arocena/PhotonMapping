@@ -11,7 +11,7 @@
 float KdTree::distance2(const glm::vec3& p1, std::shared_ptr<Photon> p2)
 {
 	glm::vec3 diff = p2->position - p1;
-	return glm::dot(diff, diff);
+	return diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
 }
 
 void KdTree::buildNode(int* indices, int n_points, int depth)
@@ -68,7 +68,7 @@ void KdTree::searchKNearestNode(int nodeIdx, const glm::vec3& queryPoint, int k,
     const Node& node = nodes[nodeIdx];
 
     // median point
-    const std::shared_ptr<Photon> median = points[node.idx];
+    const std::shared_ptr<Photon>& median = points[node.idx];
 
     // push to queue
     const float dist2 = distance2(queryPoint, median);
