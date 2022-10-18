@@ -5,8 +5,10 @@
 #include "Ray.h"
 #include "Settings.h"
 #include "Device.h"
-#include <iostream>
 #include "SquareLight.h"
+#include <iostream>
+#include <glm/gtc/constants.hpp>
+
 
 Scene::Scene()
 {
@@ -177,9 +179,10 @@ std::vector<glm::vec3> Scene::renderScene()
 float computePointLightIntensity(glm::vec3 L, const glm::vec3& normal, const float& pointLigntInt)
 {
 	double lightInt; // Light intensity
-	double fatt = 1 / pow(L.length(), 2); // Factor distancia entre luz y punto
+
+	double fatt = (L.length() * L.length()); // Factor distancia entre luz y punto
 	L = glm::normalize(L);
-	lightInt = glm::max(glm::dot(normal, L), 0.f) * fatt * pointLigntInt; // pointLight->getIntensity(); // El dot product de 2 vectores normalizados da el coseno del angulo entre ellos, 50 es la intensidad
+	lightInt = glm::max(glm::dot(normal, L), 0.f) * pointLigntInt / fatt; // pointLight->getIntensity(); // El dot product de 2 vectores normalizados da el coseno del angulo entre ellos, 50 es la intensidad
 
 	lightInt = glm::clamp(lightInt, 0.0, 1.0);
 	return static_cast<float>(lightInt);
@@ -324,11 +327,36 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 		std::shared_ptr<SquareLight> squareLight = std::dynamic_pointer_cast<SquareLight>(light);
 		if (squareLight != NULL)
 		{
-			std::vector<glm::vec3> points = squareLight->getRandomPositions(Settings::smoothness);
-			float intensity = squareLight->getIntensity() / points.size();
-			for (glm::vec3 point : points)
+
+
+			std::vector<glm::vec3> corners = squareLight->getCorners();
+			bool finishShadow = false; 
+			float intensity = squareLight->getIntensity() / corners.size();
+			glm::vec3 tempColor = Settings::backgroundColor;
+			for (int i = 0; i < 4 && finishShadow; i++)
 			{
-				color += computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
+				glm::vec3 point = corners[i];
+				glm::vec3 cornerColor = computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
+				if (cornerColor == Settings::backgroundColor)
+				{
+					finishShadow = false;
+				}
+				tempColor += cornerColor;
+			}
+
+			if (!finishShadow)
+			{
+				std::vector<glm::vec3> points = squareLight->getRandomPositions(Settings::smoothness);
+
+				float intensity = squareLight->getIntensity() / points.size();
+				for (glm::vec3 point : points)
+				{
+					color += computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
+				}
+			}
+			else
+			{
+				color += tempColor;
 			}
 		}
 
@@ -353,14 +381,19 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 	}
 
 	float r2;
-	std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 20, r2);
+	std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 500, r2);
+	glm::vec3 totalPower = Settings::backgroundColor;
 	if (photonIndices.size() > 0)
 	{
 		for (int photonIndex : photonIndices)
 		{
-			color += global->getPhoton(photonIndex)->power;
+			totalPower += global->getPhoton(photonIndex)->power;
 		}
 	}
+
+	float area = (glm::pi<float>() * r2);
+
+	color += totalPower / area;
 
 	return glm::clamp(color, glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
 }

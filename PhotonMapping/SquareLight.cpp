@@ -44,6 +44,17 @@ glm::vec3 SquareLight::getPosition() const
     return center + v * v_rand + u * u_rand;
 }
 
+std::vector<glm::vec3> SquareLight::getCorners()
+{
+    std::vector<glm::vec3> res;
+    res.push_back(center + v);
+    res.push_back(center - v);
+    res.push_back(center + u);
+    res.push_back(center - u);
+    res.push_back(center);
+    return res;
+}
+
 glm::vec3 SquareLight::getPhotonDirection() const
 {
     int rand1 = Random::getValueFrom0To255();
@@ -57,18 +68,36 @@ glm::vec3 SquareLight::getNormal()
     return normal;
 }
 
-std::vector<glm::vec3> SquareLight::getRandomPositions(unsigned rowQty)
+//std::vector<glm::vec3> SquareLight::getRandomPositions(unsigned rowQty)
+//{
+//    std::vector<glm::vec3> points;
+//
+//    for (unsigned i = 1; i < rowQty - 1; i++)
+//    {
+//        for (unsigned j = 1; j < rowQty - 1; j++)
+//        {
+//            points.push_back(getPosition());
+//        }
+//    }
+//
+//    return points;
+//}
+
+std::vector<glm::vec3> SquareLight::getRandomPositions(int rowQty)
 {
     std::vector<glm::vec3> points;
+    glm::vec3 vSeg = v / (float)rowQty;
+    glm::vec3 uSeg = u / (float)rowQty;
 
-    for (unsigned i = 1; i < rowQty - 1; i++)
+    for (int i = -rowQty/2; i < rowQty/2; i++)
     {
-        for (unsigned j = 1; j < rowQty - 1; j++)
+        for (int j = -rowQty/2; j < rowQty/2; j++)
         {
-            points.push_back(getPosition());
+            points.push_back(center + vSeg * (float)i + uSeg * (float)j);
         }
     }
 
     return points;
+
 }
 

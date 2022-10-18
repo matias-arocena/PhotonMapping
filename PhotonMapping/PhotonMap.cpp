@@ -9,6 +9,8 @@
 #include "SquareLight.h"
 #include "Settings.h"
 #include "Scene.h"
+#include <glm/gtc/constants.hpp>
+
 
 void Photon::loadFromString(std::string photonString)
 {
@@ -201,37 +203,47 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer()
         glm::vec3 HitCoordinates;
 
         if (camRay->getHit(HitCoordinates))
-        {     
+        {
             float r2;
-            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 1, r2);
-
+            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 500, r2);
             int photonIndex = photonIndices[0];
 
-            if (r2 < .00005f)
-            {
-                std::shared_ptr<Photon> photon = photons[photonIndex];
-                buffer.push_back(photon->power * 255.f);
-            }
-            else
-            {
-                buffer.push_back(glm::vec3{ 0,0,0 });
-            }
-
-            /*
-            float r2;
-			std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, .00005f, r2);
-
-			glm::vec3 color = {0, 0, 0};
-            if (photonIndices.size() > 0 && r2 < .00005f)
+            glm::vec3 totalPower = Settings::backgroundColor;
+            if (photonIndices.size() > 0)
             {
                 for (int photonIndex : photonIndices)
                 {
-				    color += photons[photonIndex]->power;
+                    totalPower += getPhoton(photonIndex)->power;
+                    if (totalPower.x >= 1 || totalPower.y >= 1  || totalPower.z >= 1)
+                    {
+                        std::cout << "mayor a 1" << std::endl;
+                    }
                 }
             }
 
-			buffer.push_back(color * 255.f);
-            */
+            float area = (glm::pi<float>() * r2);
+
+            totalPower = totalPower / area;
+            if (totalPower.x >= 1 || totalPower.y >= 1 || totalPower.z >= 1)
+            {
+                std::cout << "mayor a 1" << std::endl;
+            }
+            buffer.push_back(glm::clamp(totalPower, {0,0,0}, {1,1,1}) * 255.f);
+
+            //float r2;
+            //std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 1, r2);
+
+            //int photonIndex = photonIndices[0];
+
+            //if (r2 < .00005f)
+            //{
+            //    std::shared_ptr<Photon> photon = photons[photonIndex];
+            //    buffer.push_back(photon->power * 255.f);
+            //}
+            //else
+            //{
+            //    buffer.push_back(glm::vec3{ 0,0,0 });
+            //}
         }
         else
         {
