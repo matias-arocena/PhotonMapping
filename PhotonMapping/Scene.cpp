@@ -8,6 +8,7 @@
 #include "SquareLight.h"
 #include <iostream>
 #include <glm/gtc/constants.hpp>
+#include <omp.h>
 
 
 Scene::Scene()
@@ -139,7 +140,12 @@ glm::vec3 colorToRgb(const glm::vec3& color)
 }
 
 
-std::shared_ptr<PhotonMap> Scene::photonMapping()
+std::shared_ptr<PhotonMap> Scene::getGlobalPhotonMap()
+{
+	return global;
+}
+
+void Scene::photonMapping()
 {
 	std::shared_ptr<PhotonMap> photonMap = std::make_shared<PhotonMap>();
 	float globalIntensity = 0;
@@ -157,19 +163,17 @@ std::shared_ptr<PhotonMap> Scene::photonMapping()
 	}
 
 	global = photonMap;
-
-	return photonMap;
 }
 
 std::vector<glm::vec3> Scene::renderScene()
 {
-    std::vector<glm::vec3> buffer;
-
-    std::vector<std::shared_ptr<Ray>> camRays = camera->generateRaysCamera();
-    for (auto camRay : camRays)
-    {
-
-        buffer.push_back(colorToRgb(trace(camRay, Settings::maxDepth, 1.0f)));
+	std::vector<glm::vec3> buffer(Settings::width * Settings::height, glm::vec3{ 0,0,0 });
+	std::vector<std::shared_ptr<Ray>> camRays = camera->generateRaysCamera();
+	
+	#pragma omp parallel for
+    for (int i = 0; i < camRays.size(); ++i)
+	{
+        buffer[i] = colorToRgb(trace(camRays[i], Settings::maxDepth, 1.0f));
 
     }
     return buffer;

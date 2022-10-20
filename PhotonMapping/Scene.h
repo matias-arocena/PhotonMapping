@@ -34,7 +34,8 @@ public:
 	std::shared_ptr<Mesh> getMeshWithGeometryID(unsigned id);
 	//bool getMeshWithGeometryID(unsigned id, std::shared_ptr<Mesh> mesh);
 
-	std::shared_ptr<PhotonMap> photonMapping();
+	std::shared_ptr<PhotonMap> getGlobalPhotonMap();
+	void photonMapping();
 	std::vector<glm::vec3> renderScene();
 
 

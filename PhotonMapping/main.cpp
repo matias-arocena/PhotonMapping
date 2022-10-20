@@ -12,16 +12,15 @@
 #include "KdTree.h"
 #include "PhotonMap.h"
 #include <assimp/importer.hpp>
-
+#include <omp.h>
 
 
 int main()
 {
 	importScene();
-	std::vector<glm::vec3> buffer2 = Scene::getInstance().photonMapping()->getMapBuffer();
-	Scene::getInstance().saveImage(buffer2, "photonmapping.png");
-	std::cout << "Photon Mapping" << std::endl;
-	std::vector<glm::vec3> buffer = Scene::getInstance().renderScene();
-	std::cout << "RayTracing" << std::endl;
-	Scene::getInstance().saveImage(buffer, "raytracing.png");
+	Scene::getInstance().photonMapping();
+	std::vector<glm::vec3> buffer1 = Scene::getInstance().getGlobalPhotonMap()->getMapBuffer();
+	Scene::getInstance().saveImage(buffer1, "globalphotonmapping.png");
+	std::vector<glm::vec3> buffer2 = Scene::getInstance().renderScene();
+	Scene::getInstance().saveImage(buffer2, "raytracing.png");
 }

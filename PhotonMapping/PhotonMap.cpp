@@ -189,20 +189,22 @@ std::vector<int> PhotonMap::queryKNearestPhotons(const glm::vec3& p, float radiu
 
 std::vector<glm::vec3> PhotonMap::getMapBuffer()
 {
-   std::vector<glm::vec3> buffer;
+    std::vector<glm::vec3> buffer(Settings::width * Settings::height, glm::vec3{0,0,0});
 
     if (photons.size() == 0)
     {
-        return std::vector<glm::vec3>(Settings::width * Settings::height);
+        return std::vector<glm::vec3>(Settings::width * Settings::height, glm::vec3{0,0,0});
     }
     std::vector<std::shared_ptr<Ray>> camRays = Scene::getInstance().getCamera()->generateRaysCamera();
-    for (auto camRay : camRays)
+
+    #pragma omp parallel for
+    for (int i = 0; i < camRays.size(); ++i)
     {
-        Scene::getInstance().throwRay(camRay);
+        Scene::getInstance().throwRay(camRays[i]);
 
         glm::vec3 HitCoordinates;
 
-        if (camRay->getHit(HitCoordinates))
+        if (camRays[i]->getHit(HitCoordinates))
         {
             float r2;
             std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 500, r2);
@@ -214,21 +216,14 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer()
                 for (int photonIndex : photonIndices)
                 {
                     totalPower += getPhoton(photonIndex)->power;
-                    if (totalPower.x >= 1 || totalPower.y >= 1  || totalPower.z >= 1)
-                    {
-                        std::cout << "mayor a 1" << std::endl;
-                    }
+
                 }
             }
 
             float area = (glm::pi<float>() * r2);
 
             totalPower = totalPower / area;
-            if (totalPower.x >= 1 || totalPower.y >= 1 || totalPower.z >= 1)
-            {
-                std::cout << "mayor a 1" << std::endl;
-            }
-            buffer.push_back(glm::clamp(totalPower, {0,0,0}, {1,1,1}) * 255.f);
+            buffer[i] = glm::clamp(totalPower, {0,0,0}, {1,1,1}) * 255.f;
 
             //float r2;
             //std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 1, r2);
@@ -244,10 +239,6 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer()
             //{
             //    buffer.push_back(glm::vec3{ 0,0,0 });
             //}
-        }
-        else
-        {
-            buffer.push_back(glm::vec3{ 0,0,0 });
         }
     }
     return buffer;
