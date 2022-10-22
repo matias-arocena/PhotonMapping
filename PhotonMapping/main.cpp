@@ -18,6 +18,8 @@
 int main()
 {
 	importScene();
+	std::srand(time(0));
+
 	Scene::getInstance().photonMapping();
 	std::vector<glm::vec3> buffer1 = Scene::getInstance().getGlobalPhotonMap()->getMapBuffer();
 	Scene::getInstance().saveImage(buffer1, "globalphotonmapping.png");

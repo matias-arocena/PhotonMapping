@@ -10,6 +10,7 @@
 #include "Settings.h"
 #include "Scene.h"
 #include <glm/gtc/constants.hpp>
+#include <glm/gtc/random.hpp>
 
 
 void Photon::loadFromString(std::string photonString)
@@ -68,7 +69,8 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
     
         if (material->getOpacity() < 1.0f)
         {
-			Photon::trace(photon->position, glm::refract(direction, normal, currentRefract/material->getRefraction()), photon->power, 1, material->getRefraction(), photonMap);
+            auto newDirection = glm::refract(direction, normal, currentRefract / material->getRefraction());
+			Photon::trace(photon->position + newDirection * 0.01f, newDirection, photon->power, 1, material->getRefraction(), photonMap);
         } 
         else
         {
@@ -80,22 +82,29 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
                 {
 					photonMap->addPhoton(photon);
                 }
-                
-                int rand1 = Random::getValueFrom0To255();
-                int rand2 = Random::getValueFrom0To255() % 128;
-                glm::vec3 reflectedDirection = glm::normalize(glm::vec3(normal.x + cos(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), normal.y + sin(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), //direccion
-					normal.z + cos(rand2 * (1. / 256.) * M_PI)));
 
-                Photon::trace(photon->position, reflectedDirection, photon->power * material->getDiffuse(), depth + 1, currentRefract, photonMap);
+
+                glm::vec3 reflectedDirection = glm::sphericalRand(1.);
+                // Vector esta atras de la superficie
+                if (glm::dot(normal, reflectedDirection) < 0)
+                {
+                    reflectedDirection = -reflectedDirection;
+                }
+
+                Photon::trace(photon->position + reflectedDirection * 0.01f, reflectedDirection, photon->power * material->getDiffuse(), depth + 1, currentRefract, photonMap);
 			}
 			else if (type == ReflectionType::Specular)
 			{
-                Photon::trace(photon->position, glm::reflect(direction, normal), photon->power, depth + 1, currentRefract, photonMap);
+                auto newDirection = glm::reflect(direction, normal);
+                Photon::trace(photon->position + newDirection * 0.01f, newDirection, photon->power, depth + 1, currentRefract, photonMap);
 			}
-			else
+			else // Absorb
 			{
                 {
-					photonMap->addPhoton(photon);
+                    if (depth != 1)
+                    {
+                        photonMap->addPhoton(photon);
+                    }
                 }
 				return;
 			}
@@ -207,7 +216,7 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer()
         if (camRays[i]->getHit(HitCoordinates))
         {
             float r2;
-            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 500, r2);
+            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 2, r2);
             int photonIndex = photonIndices[0];
 
             glm::vec3 totalPower = Settings::backgroundColor;

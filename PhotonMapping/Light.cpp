@@ -25,9 +25,20 @@ void Light::emitPhotons(std::shared_ptr<PhotonMap> photonMap)
 	{
 		glm::vec3 direction = getPhotonDirection();
 		glm::vec3 position = getPosition();
-		Photon::trace(position, direction, color * (intensity / maximumEmittedPhotons), 1, 1, photonMap);
-		emittedPhotons += 1;
+		{
+			Photon::trace(position + direction * 0.01f, direction, color * (intensity / maximumEmittedPhotons), 1, 1, photonMap);
+			emittedPhotons += 1;
+		}
 	}
+}
+
+void Light::emitPhoton(std::shared_ptr<PhotonMap> photonMap)
+{
+
+	glm::vec3 direction = getPhotonDirection();
+	glm::vec3 position = getPosition();
+	Photon::trace(position, direction, color * (intensity / maximumEmittedPhotons), 1, 1, photonMap);
+	
 }
 
 Light::~Light(){}

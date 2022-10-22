@@ -40,7 +40,7 @@ private:
 	KdTree kdtree;
 
 public:
-
+	unsigned absCount = 0;
 	void addPhoton(std::shared_ptr<Photon> photon);
 	void build();
 

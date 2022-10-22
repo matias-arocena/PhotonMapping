@@ -4,6 +4,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <glm/gtc/random.hpp>
+
 SquareLight::SquareLight(float intensity, unsigned maximumEmittedPhotons, glm::vec3 color, glm::vec3 center, glm::vec3 normal, glm::vec3 v) : Light(intensity, maximumEmittedPhotons, color), center{ center }, normal{ glm::normalize(normal) }, v{ v } {
     u = glm::cross(normal, u);
 }
@@ -57,10 +59,13 @@ std::vector<glm::vec3> SquareLight::getCorners()
 
 glm::vec3 SquareLight::getPhotonDirection() const
 {
-    int rand1 = Random::getValueFrom0To255();
-	int rand2 = Random::getValueFrom0To255() % 128;
-    return glm::normalize(glm::vec3(normal.x + cos(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), normal.y + sin(2 * rand1 * (1. / 256.) * M_PI) * sin(rand2 * (1. / 256.) * M_PI), //direccion
-        normal.z + cos(rand2 * (1. / 256.) * M_PI)));
+    glm::vec3 randVec = glm::sphericalRand(1.);
+    // Vector esta atras de la luz
+    if (glm::dot(normal, randVec) < 0)
+    {
+        randVec = -randVec;
+    }
+    return randVec;
 }
 
 glm::vec3 SquareLight::getNormal()

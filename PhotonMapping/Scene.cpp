@@ -159,8 +159,11 @@ void Scene::photonMapping()
 	{
 		light->setPhotonQuantity((light->getIntensity() / globalIntensity) * Settings::photonQuantity);
 		light->emitPhotons(photonMap);
-		photonMap->build();
+
 	}
+
+	photonMap->build();
+	photonMap->absCount = 0;
 
 	global = photonMap;
 }
@@ -184,7 +187,8 @@ float computePointLightIntensity(glm::vec3 L, const glm::vec3& normal, const flo
 {
 	double lightInt; // Light intensity
 
-	double fatt = (L.length() * L.length()); // Factor distancia entre luz y punto
+	double fatt = glm::length(L) * glm::length(L); // Factor distancia entre luz y punto 1 / d^2
+	
 	L = glm::normalize(L);
 	lightInt = glm::max(glm::dot(normal, L), 0.f) * pointLigntInt / fatt; // pointLight->getIntensity(); // El dot product de 2 vectores normalizados da el coseno del angulo entre ellos, 50 es la intensidad
 
@@ -383,15 +387,17 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 		auto reflectRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), reflect);
 		color += trace(reflectRay, depth - 1, currentRefract) * material->getReflection();
 	}
-
+	// Photon map
 	float r2;
-	std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 500, r2);
+	std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 1000, r2);
 	glm::vec3 totalPower = Settings::backgroundColor;
 	if (photonIndices.size() > 0)
 	{
 		for (int photonIndex : photonIndices)
 		{
-			totalPower += global->getPhoton(photonIndex)->power;
+			auto photon = global->getPhoton(photonIndex);
+			float fatt = 10 * pow(glm::length(photon->position - hitPos), 2) / r2; // TODO: Ta bien esto?
+			totalPower += photon->power * glm::abs(glm::dot(normal, photon->incidentDirection)) * fatt; // Incident direction affects photon power contribution
 		}
 	}
 

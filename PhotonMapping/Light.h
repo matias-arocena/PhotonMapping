@@ -16,6 +16,7 @@ public:
 	void setPhotonQuantity(int quantity);
 	float getIntensity();
 	void emitPhotons(std::shared_ptr<PhotonMap> photonMap);
+	void emitPhoton(std::shared_ptr<PhotonMap> photonMap);
 	virtual ~Light();
 	glm::vec3 getColor();
 
