@@ -25,7 +25,7 @@ Camera::SecreenBase Camera::screenBaseVectors()
 	float dist = 1;
 	glm::vec3 screenOrigin = { 0,0,0 };
 	screenOrigin = position + dist * direction;
-	glm::vec3 rightVector = -glm::cross(direction, upVector);
+	glm::vec3 rightVector = glm::cross(direction, upVector);
 	rightVector = glm::normalize(rightVector);
 	return { screenOrigin, upVector, rightVector };
 }

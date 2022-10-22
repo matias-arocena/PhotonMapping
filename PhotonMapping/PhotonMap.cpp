@@ -69,8 +69,20 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
     
         if (material->getOpacity() < 1.0f)
         {
-            auto newDirection = glm::refract(direction, normal, currentRefract / material->getRefraction());
-			Photon::trace(photon->position + newDirection * 0.01f, newDirection, photon->power, 1, material->getRefraction(), photonMap);
+            // La normal se tiene que invertir cuando se esta adentro del objeto refractado
+            // Esta solucion esta mal, funciona solo cuando el ior del material vidrio es distinto de 1
+            // Y tampoco toma en cuenta cuando dos objetos transparentes se chocan
+            glm::vec3 newDirection = { 0,0,0 };
+            if (currentRefract != 1.f)
+            {
+                newDirection = glm::refract(direction,- normal, currentRefract / material->getRefraction());
+            }
+            else
+            {
+                newDirection = glm::refract(direction, normal, currentRefract / material->getRefraction());
+            }
+            Photon::trace(photon->position + newDirection * 0.01f, newDirection, photon->power, depth + 1, material->getRefraction(), photonMap);
+            
         } 
         else
         {

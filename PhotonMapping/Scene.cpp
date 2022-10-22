@@ -320,65 +320,79 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 	glm::vec3 hitPos;
 	r->getHit(hitPos);
 
-	for (auto light : lights)
-	{
-		/*
-		Point light
-		*/
-		std::shared_ptr<PointLight> pointLight = std::dynamic_pointer_cast<PointLight>(light);
-		if (pointLight != NULL)
+	if (material->getOpacity() == 1) {
+		for (auto light : lights)
 		{
-			color += computeShadow(pointLight->getPosition(), normal, hitPos, pointLight->getIntensity(), material, r, -1);
-		}
-
-		/* Square light */
-		std::shared_ptr<SquareLight> squareLight = std::dynamic_pointer_cast<SquareLight>(light);
-		if (squareLight != NULL)
-		{
-
-
-			std::vector<glm::vec3> corners = squareLight->getCorners();
-			bool finishShadow = false; 
-			float intensity = squareLight->getIntensity() / corners.size();
-			glm::vec3 tempColor = Settings::backgroundColor;
-			for (int i = 0; i < 4 && finishShadow; i++)
+			/*
+			Point light
+			*/
+			std::shared_ptr<PointLight> pointLight = std::dynamic_pointer_cast<PointLight>(light);
+			if (pointLight != NULL)
 			{
-				glm::vec3 point = corners[i];
-				glm::vec3 cornerColor = computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
-				if (cornerColor == Settings::backgroundColor)
+				color += computeShadow(pointLight->getPosition(), normal, hitPos, pointLight->getIntensity(), material, r, -1);
+			}
+
+			/* Square light */
+			std::shared_ptr<SquareLight> squareLight = std::dynamic_pointer_cast<SquareLight>(light);
+			if (squareLight != NULL)
+			{
+
+
+				std::vector<glm::vec3> corners = squareLight->getCorners();
+				bool finishShadow = false;
+				float intensity = squareLight->getIntensity() / corners.size();
+				glm::vec3 tempColor = Settings::backgroundColor;
+				for (int i = 0; i < 4 && finishShadow; i++)
 				{
-					finishShadow = false;
+					glm::vec3 point = corners[i];
+					glm::vec3 cornerColor = computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
+					if (cornerColor == Settings::backgroundColor)
+					{
+						finishShadow = false;
+					}
+					tempColor += cornerColor;
 				}
-				tempColor += cornerColor;
-			}
 
-			if (!finishShadow)
-			{
-				std::vector<glm::vec3> points = squareLight->getRandomPositions(Settings::smoothness);
-
-				float intensity = squareLight->getIntensity() / points.size();
-				for (glm::vec3 point : points)
+				if (!finishShadow)
 				{
-					color += computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
+					std::vector<glm::vec3> points = squareLight->getRandomPositions(Settings::smoothness);
+
+					float intensity = squareLight->getIntensity() / points.size();
+					for (glm::vec3 point : points)
+					{
+						color += computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
+					}
+				}
+				else
+				{
+					color += tempColor;
 				}
 			}
-			else
-			{
-				color += tempColor;
-			}
-		}
 
+		}
 	}
 
 	if (material->getOpacity() < 1) {
 
-		glm::vec3 reflect = glm::reflect(r->direction, normal);
-		glm::vec3 refract = glm::refract(r->direction, normal, currentRefract / material->getRefraction());
+		//glm::vec3 reflect = glm::reflect(r->direction, normal);
 
-		auto reflectRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), reflect);
-		auto refractRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), refract);
+		// La normal se tiene que invertir cuando se esta adentro del objeto refractado
+		// Esta solucion esta mal, funciona solo cuando el ior del material vidrio es distinto de 1
+		// Y tampoco toma en cuenta cuando dos objetos transparentes se chocan
+		glm::vec3 refract = { 0,0,0 };
+		if (currentRefract != 1)
+		{
+			refract = glm::refract(r->direction, -normal, currentRefract / material->getRefraction());
+		}
+		else
+		{
+			refract = glm::refract(r->direction, normal, currentRefract / material->getRefraction());
+		}
+		
+		//auto reflectRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), reflect);
+		auto refractRay = std::make_shared<Ray>(hitPos + refract * 0.01f, refract);
 
-		color += trace(reflectRay, depth - 1, material->getRefraction());
+		//color += trace(reflectRay, depth - 1, material->getReflection());
 		color += trace(refractRay, depth - 1, material->getRefraction());
 	}
 	else if (material->getReflection())
@@ -387,23 +401,26 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 		auto reflectRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), reflect);
 		color += trace(reflectRay, depth - 1, currentRefract) * material->getReflection();
 	}
-	// Photon map
-	float r2;
-	std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 1000, r2);
-	glm::vec3 totalPower = Settings::backgroundColor;
-	if (photonIndices.size() > 0)
-	{
-		for (int photonIndex : photonIndices)
+
+	if (material->getOpacity() == 1) {
+		// Photon map
+		float r2;
+		std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 1000, r2);
+		glm::vec3 totalPower = Settings::backgroundColor;
+		if (photonIndices.size() > 0)
 		{
-			auto photon = global->getPhoton(photonIndex);
-			float fatt = 10 * pow(glm::length(photon->position - hitPos), 2) / r2; // TODO: Ta bien esto?
-			totalPower += photon->power * glm::abs(glm::dot(normal, photon->incidentDirection)) * fatt; // Incident direction affects photon power contribution
+			for (int photonIndex : photonIndices)
+			{
+				auto photon = global->getPhoton(photonIndex);
+				float fatt = 10 * pow(glm::length(photon->position - hitPos), 2) / r2; // TODO: Ta bien esto?
+				totalPower += photon->power * glm::abs(glm::dot(normal, photon->incidentDirection)) * fatt; // Incident direction affects photon power contribution
+			}
 		}
+
+		float area = (glm::pi<float>() * r2);
+
+		color += totalPower / area;
 	}
-
-	float area = (glm::pi<float>() * r2);
-
-	color += totalPower / area;
 
 	return glm::clamp(color, glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
 }

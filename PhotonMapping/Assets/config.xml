@@ -2,7 +2,6 @@
 <Scene resx="600" resy="600" maxDepth="10" bgColorR="0" bgColorG="0" bgColorB="0" fov="120" smoothness="20">
     <Models>
         <Model posx="0" posy="0" posz="0" objRoute="Assets/caja.obj"/>
-        <Model posx="0" posy="0" posz="0" objRoute="Assets/test.obj"/>
     </Models>
     <Lights>
 		<!--<PointLight x="-.5" y="0" z="-.3" intensity="1" colorr="1" colorg="1" colorb="1"/>--> 

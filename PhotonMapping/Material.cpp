@@ -45,7 +45,9 @@ Material::Material(aiMaterial* material)
 	material->Get(AI_MATKEY_SHININESS, specularExponent);
 
 	// Specular factor
-	//material->Get(AI_MATKEY_SHININESS_STRENGTH, specularFactor);
+	float specularStrenght = 0.0f;
+	material->Get(AI_MATKEY_SHININESS_STRENGTH, specularStrenght);
+
 	specularFactor = 0.4f;
 
 	// Ior
@@ -58,11 +60,11 @@ Material::Material(aiMaterial* material)
 	this->diffuse = assimpColorToGlm(difColor);
 	this->specular = assimpColorToGlm(speColor);
 	this->colorTransparent = assimpColorToGlm(traColor);
-	this->reflection = 0.f;
-	this->refraction = .0f;
+	//this->refraction = .0f;
 
 	this->diffuseCoefficient = this->diffuse;
-	this->specularCoefficient = glm::vec3(0, 0, 0);
+	this->specularCoefficient = specular;
+	this->reflection = glm::dot(specularCoefficient, glm::vec3(1, 1, 1) / 3.f);
 }
 
 glm::vec3 Material::getDiffuse()
