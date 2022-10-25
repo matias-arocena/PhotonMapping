@@ -196,6 +196,21 @@ float computePointLightIntensity(glm::vec3 L, const glm::vec3& normal, const flo
 	return static_cast<float>(lightInt);
 }
 
+float computeSquareLightIntensity(glm::vec3 L, const glm::vec3& normal, const float& pointLigntInt, std::shared_ptr<SquareLight> light) {
+	double lightInt; // Light intensity
+
+	double fatt = glm::length(L) * glm::length(L); // Factor distancia entre luz y punto 1 / d^2
+
+	L = glm::normalize(L);
+	float dot = glm::dot(-L, light->getNormal());
+
+	lightInt = glm::max(glm::dot(normal, L), 0.f) * dot * pointLigntInt / fatt; // pointLight->getIntensity(); // El dot product de 2 vectores normalizados da el coseno del angulo entre ellos, 50 es la intensidad
+
+	lightInt = glm::clamp(lightInt, 0.0, 1.0);
+	return static_cast<float>(lightInt);
+
+}
+
 float computeSpecularPointLightIntensity(
 	const glm::vec3& L, const glm::vec3& normal, 
 	std::shared_ptr<Ray> r,
@@ -298,8 +313,16 @@ glm::vec3 Scene::computeShadow(const glm::vec3 &lightPosition, const glm::vec3 &
 	}
 	else if (squareLight == NULL || shadowRay->getRayHit()->hit.geomID == lightId)
 	{
+		float lightInt = 0;
 		// Diffuse Light intensity
-		float lightInt = computePointLightIntensity(L, normal, intensity);
+		if (squareLight != NULL)
+		{
+			lightInt = computeSquareLightIntensity(L, normal, intensity, squareLight);
+		}
+		else
+		{
+			lightInt = computePointLightIntensity(L, normal, intensity);
+		}
 
 		L = glm::normalize(L);
 		// Phong Specular intensity
@@ -342,7 +365,7 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 				bool finishShadow = false;
 				float intensity = squareLight->getIntensity() / corners.size();
 				glm::vec3 tempColor = Settings::backgroundColor;
-				for (int i = 0; i < 4 && finishShadow; i++)
+				for (int i = 0; i < corners.size() && finishShadow; i++)
 				{
 					glm::vec3 point = corners[i];
 					glm::vec3 cornerColor = computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
@@ -412,8 +435,8 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 			for (int photonIndex : photonIndices)
 			{
 				auto photon = global->getPhoton(photonIndex);
-				float fatt = 10 * pow(glm::length(photon->position - hitPos), 2) / r2; // TODO: Ta bien esto?
-				totalPower += photon->power * glm::abs(glm::dot(normal, photon->incidentDirection)) * fatt; // Incident direction affects photon power contribution
+				//float fatt = 10 * pow(glm::length(photon->position - hitPos), 2) / r2; // TODO: Ta bien esto?
+				totalPower += photon->power * glm::abs(glm::dot(normal, photon->incidentDirection)) ; // Incident direction affects photon power contribution
 			}
 		}
 

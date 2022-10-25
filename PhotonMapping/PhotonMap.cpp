@@ -228,7 +228,7 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer()
         if (camRays[i]->getHit(HitCoordinates))
         {
             float r2;
-            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 2, r2);
+            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 1, r2);
             int photonIndex = photonIndices[0];
 
             glm::vec3 totalPower = Settings::backgroundColor;
