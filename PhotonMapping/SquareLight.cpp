@@ -3,11 +3,15 @@
 #include "Random.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <memory>
 
 #include <glm/gtc/random.hpp>
 
 SquareLight::SquareLight(float intensity, unsigned maximumEmittedPhotons, glm::vec3 color, glm::vec3 center, glm::vec3 normal, glm::vec3 v) : Light(intensity, maximumEmittedPhotons, color), center{ center }, normal{ glm::normalize(normal) }, v{ v } {
     u = glm::cross(normal, u);
+
+    std::shared_ptr<Material> material = std::make_shared<Material>(color, color, color, color, 1.f, 1.f, 0.f, 0.f, 0.f);
+    this->material = material;
 }
 
 void SquareLight::createEmbreeMesh(RTCDevice device)

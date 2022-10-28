@@ -50,13 +50,6 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
         return;
     }
     
-    squareLight = std::dynamic_pointer_cast<SquareLight>(mesh);
-	// No choca con una luz
-	if (squareLight != NULL)
-	{
-        //rebotar sin guardar. Preguntar.
-    }
-    else
     {
         std::shared_ptr<Photon> photon = std::make_shared<Photon>();
         photon->power = power;  
