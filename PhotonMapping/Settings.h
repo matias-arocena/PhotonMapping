@@ -13,5 +13,6 @@ public:
 	static int fov;
 	static int antialiasing;
 	static int smoothness;
-	static int photonQuantity;
+	static int globalPhotonQuantity;
+	static int causticPhotonQuantity;
 };

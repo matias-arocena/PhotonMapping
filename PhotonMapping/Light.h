@@ -15,8 +15,8 @@ public:
 	Light(float intensity, int maximumEmittedPhotons, glm::vec3 color);
 	void setPhotonQuantity(int quantity);
 	float getIntensity();
-	void emitPhotons(std::shared_ptr<PhotonMap> photonMap);
-	void emitPhoton(std::shared_ptr<PhotonMap> photonMap);
+	void emitPhotons(std::shared_ptr<PhotonMap> photonMap, bool isCaustic);
+	void emitPhoton(std::shared_ptr<PhotonMap> photonMap, bool isCaustic);
 	virtual ~Light();
 	glm::vec3 getColor();
 

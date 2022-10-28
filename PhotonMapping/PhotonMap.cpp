@@ -28,7 +28,7 @@ void Photon::loadFromString(std::string photonString)
 
 }
 
-void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int depth, float currentRefract, std::shared_ptr<PhotonMap> photonMap)
+void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int depth, float currentRefract, std::shared_ptr<PhotonMap> photonMap, bool isCausticMap)
 {
     if (depth > Settings::maxDepth)
     {
@@ -42,24 +42,24 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
 
 
     std::shared_ptr<Mesh> mesh = NULL;
-	std::shared_ptr<SquareLight> squareLight = NULL;
+    std::shared_ptr<SquareLight> squareLight = NULL;
 
-	mesh = Scene::getInstance().getMeshWithGeometryID(hit->hit.geomID);
+    mesh = Scene::getInstance().getMeshWithGeometryID(hit->hit.geomID);
     if (mesh == NULL)
     {
         return;
     }
-    
+
     {
         std::shared_ptr<Photon> photon = std::make_shared<Photon>();
-        photon->power = power;  
+        photon->power = power;
         photon->incidentDirection = direction;
         ray->getHit(photon->position);
 
-		glm::vec3 normal = ray->getNormal();
+        glm::vec3 normal = ray->getNormal();
 
-		auto material = mesh->getMaterial();
-    
+        auto material = mesh->getMaterial();
+
         if (material->getOpacity() < 1.0f)
         {
             // La normal se tiene que invertir cuando se esta adentro del objeto refractado
@@ -68,24 +68,24 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
             glm::vec3 newDirection = { 0,0,0 };
             if (currentRefract != 1.f)
             {
-                newDirection = glm::refract(direction,- normal, currentRefract / material->getRefraction());
+                newDirection = glm::refract(direction, -normal, currentRefract / material->getRefraction());
             }
             else
             {
                 newDirection = glm::refract(direction, normal, currentRefract / material->getRefraction());
             }
-            Photon::trace(photon->position + newDirection * 0.01f, newDirection, photon->power, depth + 1, material->getRefraction(), photonMap);
-            
-        } 
+            Photon::trace(photon->position + newDirection * 0.01f, newDirection, photon->power, depth + 1, material->getRefraction(), photonMap, isCausticMap);
+
+        }
         else
         {
             ReflectionType type = photon->russianRoulete(material, Random::getRussianRouletteValue());
-			if (type == ReflectionType::Diffuse)
-			{
+            if (type == ReflectionType::Diffuse && !isCausticMap)
+            {
 
                 if (depth != 1)
                 {
-					photonMap->addPhoton(photon);
+                    photonMap->addPhoton(photon);
                 }
 
 
@@ -96,27 +96,26 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
                     reflectedDirection = -reflectedDirection;
                 }
 
-                Photon::trace(photon->position + reflectedDirection * 0.01f, reflectedDirection, photon->power * material->getDiffuse(), depth + 1, currentRefract, photonMap);
-			}
-			else if (type == ReflectionType::Specular)
-			{
+                Photon::trace(photon->position + reflectedDirection * 0.01f, reflectedDirection, photon->power * material->getDiffuse(), depth + 1, currentRefract, photonMap, isCausticMap);
+            }
+            else if (type == ReflectionType::Specular)
+            {
                 auto newDirection = glm::reflect(direction, normal);
-                Photon::trace(photon->position + newDirection * 0.01f, newDirection, photon->power, depth + 1, currentRefract, photonMap);
-			}
-			else // Absorb
-			{
+                Photon::trace(photon->position + newDirection * 0.01f, newDirection, photon->power, depth + 1, currentRefract, photonMap, isCausticMap);
+            }
+            else // Absorb
+            {
                 {
                     if (depth != 1)
                     {
                         photonMap->addPhoton(photon);
                     }
                 }
-				return;
-			}
+                return;
+            }
 
-		}
+        }
     }
-   
 }
 
 ReflectionType Photon::russianRoulete(std::shared_ptr<Material> material, float value)
@@ -221,7 +220,7 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer()
         if (camRays[i]->getHit(HitCoordinates))
         {
             float r2;
-            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 1, r2);
+            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 15, r2);
             int photonIndex = photonIndices[0];
 
             glm::vec3 totalPower = Settings::backgroundColor;

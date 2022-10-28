@@ -18,7 +18,7 @@ float Light::getIntensity()
 	return intensity;
 }
 
-void Light::emitPhotons(std::shared_ptr<PhotonMap> photonMap)
+void Light::emitPhotons(std::shared_ptr<PhotonMap> photonMap, bool isCaustic)
 {
 	int emittedPhotons = 0;
 	while (emittedPhotons <= maximumEmittedPhotons)
@@ -26,18 +26,18 @@ void Light::emitPhotons(std::shared_ptr<PhotonMap> photonMap)
 		glm::vec3 direction = getPhotonDirection();
 		glm::vec3 position = getPosition();
 		{
-			Photon::trace(position + direction * 0.01f, direction, color * (intensity / maximumEmittedPhotons), 1, 1, photonMap);
+			Photon::trace(position + direction * 0.01f, direction, color * (intensity / maximumEmittedPhotons), 1, 1, photonMap, isCaustic);
 			emittedPhotons += 1;
 		}
 	}
 }
 
-void Light::emitPhoton(std::shared_ptr<PhotonMap> photonMap)
+void Light::emitPhoton(std::shared_ptr<PhotonMap> photonMap, bool isCaustic)
 {
 
 	glm::vec3 direction = getPhotonDirection();
 	glm::vec3 position = getPosition();
-	Photon::trace(position, direction, color * (intensity / maximumEmittedPhotons), 1, 1, photonMap);
+	Photon::trace(position, direction, color * (intensity / maximumEmittedPhotons), 1, 1, photonMap, isCaustic);
 	
 }
 

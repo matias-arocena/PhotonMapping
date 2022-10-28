@@ -145,7 +145,12 @@ std::shared_ptr<PhotonMap> Scene::getGlobalPhotonMap()
 	return global;
 }
 
-void Scene::photonMapping()
+std::shared_ptr<PhotonMap> Scene::getCausticPhotonMap()
+{
+	return caustic;
+}
+
+void Scene::generateGlobalPhotonMap()
 {
 	std::shared_ptr<PhotonMap> photonMap = std::make_shared<PhotonMap>();
 	float globalIntensity = 0;
@@ -157,15 +162,36 @@ void Scene::photonMapping()
 
 	for (auto light : lights)
 	{
-		light->setPhotonQuantity((light->getIntensity() / globalIntensity) * Settings::photonQuantity);
-		light->emitPhotons(photonMap);
-
+		light->setPhotonQuantity((light->getIntensity() / globalIntensity) * Settings::globalPhotonQuantity);
+		light->emitPhotons(photonMap, false);
 	}
 
 	photonMap->build();
 	photonMap->absCount = 0;
 
 	global = photonMap;
+}
+
+void Scene::generateCausticPhotonMap()
+{
+	std::shared_ptr<PhotonMap> photonMap = std::make_shared<PhotonMap>();
+	float globalIntensity = 0;
+
+	for (auto light : lights)
+	{
+		globalIntensity += light->getIntensity();
+	}
+
+	for (auto light : lights)
+	{
+		light->setPhotonQuantity((light->getIntensity() / globalIntensity) * Settings::causticPhotonQuantity);
+		light->emitPhotons(photonMap, true);
+	}
+
+	photonMap->build();
+	photonMap->absCount = 0;
+
+	caustic = photonMap;
 }
 
 std::vector<glm::vec3> Scene::renderScene()
@@ -436,11 +462,28 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 			{
 				auto photon = global->getPhoton(photonIndex);
 				//float fatt = 10 * pow(glm::length(photon->position - hitPos), 2) / r2; // TODO: Ta bien esto?
-				totalPower += photon->power * glm::abs(glm::dot(normal, photon->incidentDirection)) ; // Incident direction affects photon power contribution
+				totalPower += photon->power * glm::abs(glm::dot(normal, photon->incidentDirection)); // Incident direction affects photon power contribution
 			}
 		}
 
 		float area = (glm::pi<float>() * r2);
+
+		color += totalPower / area;
+
+		// Caustic Photon map
+		photonIndices = caustic->queryKNearestPhotons(hitPos, 10, r2);
+		totalPower = Settings::backgroundColor;
+		if (photonIndices.size() > 0)
+		{
+			for (int photonIndex : photonIndices)
+			{
+				auto photon = caustic->getPhoton(photonIndex);
+				//float fatt = 10 * pow(glm::length(photon->position - hitPos), 2) / r2; // TODO: Ta bien esto?
+				totalPower += photon->power * glm::abs(glm::dot(normal, photon->incidentDirection)); // Incident direction affects photon power contribution
+			}
+		}
+
+		area = (glm::pi<float>() * r2);
 
 		color += totalPower / area;
 	}

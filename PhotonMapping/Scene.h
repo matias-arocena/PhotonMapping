@@ -35,7 +35,11 @@ public:
 	//bool getMeshWithGeometryID(unsigned id, std::shared_ptr<Mesh> mesh);
 
 	std::shared_ptr<PhotonMap> getGlobalPhotonMap();
-	void photonMapping();
+	void generateGlobalPhotonMap();
+
+	std::shared_ptr<PhotonMap> getCausticPhotonMap();
+	void generateCausticPhotonMap();
+
 	std::vector<glm::vec3> renderScene();
 
 
@@ -50,6 +54,7 @@ private:
 	std::shared_ptr<Camera> camera;
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	std::shared_ptr<PhotonMap> global; 
+	std::shared_ptr<PhotonMap> caustic;
 
 	glm::vec3 trace(std::shared_ptr<Ray> ray, const int& depth, const float& currentRefract);
 	glm::vec3 shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> material, int depth, float currentRefract);
