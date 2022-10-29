@@ -11,6 +11,8 @@
 #include "Scene.h"
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/random.hpp>
+#include <fstream>
+#include <ostream>
 
 
 void Photon::loadFromString(std::string photonString)
@@ -26,6 +28,21 @@ void Photon::loadFromString(std::string photonString)
     incidentDirection.y = std::stof(fields[7]);
     incidentDirection.z = std::stof(fields[8]);
 
+}
+
+std::ostream& operator<<(std::ostream& o, const Photon& a)
+{
+    o << a.position.x << ";"
+        << a.position.y << ";"
+        << a.position.z << ";"
+        << a.power.r << ";"
+        << a.power.g << ";"
+        << a.power.b << ";"
+        << a.incidentDirection.x << ";"
+        << a.incidentDirection.y << ";"
+        << a.incidentDirection.z;
+
+    return o;
 }
 
 void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int depth, float currentRefract, std::shared_ptr<PhotonMap> photonMap, bool isCausticMap)
@@ -154,21 +171,6 @@ std::vector<std::string> Photon::split(const std::string& s, char delim)
     return result;
 }
 
-std::ostream& operator<<(std::ostream& o, const Photon& a)
-{
-    o << a.position.x << ";"
-        << a.position.y << ";"
-        << a.position.z << ";"
-        << a.power.r << ";"
-        << a.power.g << ";"
-        << a.power.b << ";"
-        << a.incidentDirection.x << ";"
-        << a.incidentDirection.y << ";"
-        << a.incidentDirection.z;
-
-    return o;
-}
-
 void PhotonMap::addPhoton(std::shared_ptr<Photon> p)
 {
     photons.push_back(p);
@@ -256,5 +258,28 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer()
     }
     return buffer;
 
+}
+
+void PhotonMap::exportKdTree(const std::string& path)
+{
+    kdtree.saveKdTreeToFile(path);
+}
+
+void PhotonMap::importKdTree(const std::string& path)
+{
+    std::string line;
+    std::ifstream file;
+    file.open(path);
+    if (file.is_open())
+    {
+        while (std::getline(file, line))
+        {
+            std::shared_ptr<Photon> p = std::make_shared<Photon>();
+            p->loadFromString(line);
+
+            addPhoton(p);
+        }
+        file.close();
+    }
 }
 

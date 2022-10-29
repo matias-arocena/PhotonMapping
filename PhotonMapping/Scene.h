@@ -36,6 +36,7 @@ public:
 
 	std::shared_ptr<PhotonMap> getGlobalPhotonMap();
 	void generateGlobalPhotonMap();
+	void setGlobalPhotonMap(std::shared_ptr<PhotonMap> photonMap);
 
 	std::shared_ptr<PhotonMap> getCausticPhotonMap();
 	void generateCausticPhotonMap();

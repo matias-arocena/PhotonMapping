@@ -32,11 +32,12 @@ void Scene::saveImage(std::vector<glm::vec3> buffer, std::string path)
 {
     FreeImage_Initialise();
     FIBITMAP* bitmap = FreeImage_Allocate(Settings::width, Settings::height, 24);
-    RGBQUAD color;
-    for (int j = 0; j < Settings::height; j++)
+    
+	for (int j = 0; j < Settings::height; j++)
     {
         for (int i = 0; i < Settings::width; ++i)
         {
+			RGBQUAD color;
             color.rgbRed = static_cast<BYTE>((buffer)[(j * Settings::width) + i].r);
             color.rgbBlue = static_cast<BYTE>((buffer)[(j * Settings::width) + i].b);
             color.rgbGreen = static_cast<BYTE>((buffer)[(j * Settings::width) + i].g);
@@ -160,15 +161,21 @@ void Scene::generateGlobalPhotonMap()
 		globalIntensity += light->getIntensity();
 	}
 
-	for (auto light : lights)
+	for (int i = 0; i < lights.size(); ++i)
 	{
-		light->setPhotonQuantity((light->getIntensity() / globalIntensity) * Settings::globalPhotonQuantity);
-		light->emitPhotons(photonMap, false);
+		lights[i]->setPhotonQuantity((lights[i]->getIntensity() / globalIntensity) * Settings::globalPhotonQuantity);
+		lights[i]->emitPhotons(photonMap, false);
 	}
 
 	photonMap->build();
 	photonMap->absCount = 0;
 
+	global = photonMap;
+}
+
+void Scene::setGlobalPhotonMap(std::shared_ptr<PhotonMap> photonMap)
+{
+	photonMap->build();
 	global = photonMap;
 }
 
@@ -182,10 +189,10 @@ void Scene::generateCausticPhotonMap()
 		globalIntensity += light->getIntensity();
 	}
 
-	for (auto light : lights)
+	for (int i = 0; i < lights.size(); ++i)
 	{
-		light->setPhotonQuantity((light->getIntensity() / globalIntensity) * Settings::causticPhotonQuantity);
-		light->emitPhotons(photonMap, true);
+		lights[i]->setPhotonQuantity((lights[i]->getIntensity() / globalIntensity) * Settings::causticPhotonQuantity);
+		lights[i]->emitPhotons(photonMap, true);
 	}
 
 	photonMap->build();
@@ -370,19 +377,19 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 	r->getHit(hitPos);
 
 	if (material->getOpacity() == 1) {
-		for (auto light : lights)
+		for (int i = 0; i < lights.size(); ++i)
 		{
 			/*
 			Point light
 			*/
-			std::shared_ptr<PointLight> pointLight = std::dynamic_pointer_cast<PointLight>(light);
+			std::shared_ptr<PointLight> pointLight = std::dynamic_pointer_cast<PointLight>(lights[i]);
 			if (pointLight != NULL)
 			{
 				color += computeShadow(pointLight->getPosition(), normal, hitPos, pointLight->getIntensity(), material, r, -1);
 			}
 
 			/* Square light */
-			std::shared_ptr<SquareLight> squareLight = std::dynamic_pointer_cast<SquareLight>(light);
+			std::shared_ptr<SquareLight> squareLight = std::dynamic_pointer_cast<SquareLight>(lights[i]);
 			if (squareLight != NULL)
 			{
 
@@ -407,9 +414,9 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 					std::vector<glm::vec3> points = squareLight->getRandomPositions(Settings::smoothness);
 
 					float intensity = squareLight->getIntensity() / points.size();
-					for (glm::vec3 point : points)
+					for (int j = 0; j < points.size(); ++j)
 					{
-						color += computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
+						color += computeShadow(points[j], normal, hitPos, intensity, material, r, squareLight->getGeometryId());
 					}
 				}
 				else

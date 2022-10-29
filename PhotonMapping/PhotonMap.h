@@ -8,6 +8,7 @@
 #include <memory>
 #include <random>
 #include "Scene.h"
+#include <mutex>
 
 class Scene;
 class PhotonMap;
@@ -51,4 +52,7 @@ public:
 	std::vector<int> queryKNearestPhotons(const glm::vec3& p, float radius, float& maxDist2);
 
 	std::vector<glm::vec3> getMapBuffer();
+
+	void exportKdTree(const std::string& path);
+	void importKdTree(const std::string& path);
 };

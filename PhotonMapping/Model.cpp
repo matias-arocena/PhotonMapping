@@ -72,7 +72,8 @@ std::shared_ptr<Mesh> Model::createMesh(aiMesh* mesh, const aiScene* scene)
    
     RTCError e3 = rtcGetDeviceError(Device::getInstance().getDevice());
 
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+#pragma omp parallel for
+    for (int i = 0; i < mesh->mNumVertices; i++)
     {
         // Vertex
         vertexBuffer[i * 3]     = mesh->mVertices[i].x + this->position.x;
@@ -81,8 +82,9 @@ std::shared_ptr<Mesh> Model::createMesh(aiMesh* mesh, const aiScene* scene)
 
     }
 
+#pragma omp parallel for
     // Asumo que mesh siempre tiene triángulos
-    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+    for (int i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
         indexBuffer[i * 3] = face.mIndices[0];

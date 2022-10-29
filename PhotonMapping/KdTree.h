@@ -34,6 +34,5 @@ public:
 	std::vector<int> searchKNearest(const glm::vec3& queryPoint, int k, float& maxDist2) const;
 	std::vector<int> searchKNearest(const glm::vec3& queryPoint, float radius, float& maxDist2) const;
 
-	static KdTree loadKdTreeFromFile(const std::string& path);
 	void saveKdTreeToFile(const std::string& path);
 };
