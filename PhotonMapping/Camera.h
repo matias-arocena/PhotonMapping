@@ -19,6 +19,10 @@ public:
 	Camera(glm::vec3 position, glm::vec3 direction, glm::vec3 upVector);
 	glm::vec3 getPosition();
 	glm::vec3 getDirection();
+	glm::vec3 getUp();
+	void setPosition(glm::vec3 position);
+	void setDirection(glm::vec3 direction);
+	void setUp(glm::vec3 upVector);
 	struct SecreenBase {
 		glm::vec3 origin;
 		glm::vec3 upVector;

@@ -20,6 +20,26 @@ glm::vec3 Camera::getDirection()
 	return this->direction;
 }
 
+glm::vec3 Camera::getUp() 
+{
+	return this->upVector;
+}
+
+void Camera::setPosition(glm::vec3 position)
+{
+	this->position = position;
+}
+
+void Camera::setDirection(glm::vec3 direction)
+{
+	this->direction = direction;
+}
+
+void Camera::setUp(glm::vec3 upVector)
+{
+	this->upVector = upVector;
+}
+
 Camera::SecreenBase Camera::screenBaseVectors()
 {
 	float dist = 1;
