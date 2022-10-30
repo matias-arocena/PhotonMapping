@@ -320,7 +320,7 @@ glm::vec3 Scene::trace(std::shared_ptr<Ray> ray, const int &depth, const float &
 }
 
 
-glm::vec3 Scene::computeShadow(const glm::vec3 &lightPosition, const glm::vec3 &normal, const glm::vec3 &hitPos, const float &intensity, std::shared_ptr<Material> material, std::shared_ptr<Ray> r, const int &lightId)
+glm::vec3 Scene::computeShadow(const glm::vec3 &lightPosition, const glm::vec3 &normal, const glm::vec3 &hitPos, const float &intensity, std::shared_ptr<Material> material, std::shared_ptr<Ray> r, const int &lightId, glm::vec3 lightColor)
 {
 	glm::vec3 color = Settings::backgroundColor;
 	glm::vec3 L = lightPosition - hitPos;
@@ -360,7 +360,7 @@ glm::vec3 Scene::computeShadow(const glm::vec3 &lightPosition, const glm::vec3 &
 			L = glm::normalize(L);
 			float specInt = computeSpecularPointLightIntensity(L, normal, r, lightInt, hitMaterial->getSpecularExponent(), hitMaterial->getSpecularFactor());
 
-			color = (material->getDiffuse() * lightInt) + specInt;
+			color = lightColor * ((material->getDiffuse() * lightInt) + specInt);
 		}
 	}
 	else if (squareLight == NULL || shadowRay->getRayHit()->hit.geomID == lightId)
@@ -380,7 +380,7 @@ glm::vec3 Scene::computeShadow(const glm::vec3 &lightPosition, const glm::vec3 &
 		// Phong Specular intensity
 		float specInt = computeSpecularPointLightIntensity(L, normal, r, lightInt, material->getSpecularExponent(), material->getSpecularFactor());
 
-		color = (material->getDiffuse() * lightInt) + specInt;
+		color = lightColor * ((material->getDiffuse() * lightInt) + specInt);
 
 	}
 	return color;
@@ -404,7 +404,7 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 			std::shared_ptr<PointLight> pointLight = std::dynamic_pointer_cast<PointLight>(lights[i]);
 			if (pointLight != NULL)
 			{
-				color += computeShadow(pointLight->getPosition(), normal, hitPos, pointLight->getIntensity(), material, r, -1);
+				color += computeShadow(pointLight->getPosition(), normal, hitPos, pointLight->getIntensity(), material, r, -1, pointLight->getColor());
 			}
 
 			/* Square light */
@@ -420,7 +420,7 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 				for (int i = 0; i < corners.size() && finishShadow; i++)
 				{
 					glm::vec3 point = corners[i];
-					glm::vec3 cornerColor = computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId());
+					glm::vec3 cornerColor = computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId(), squareLight->getColor());
 					if (cornerColor == Settings::backgroundColor)
 					{
 						finishShadow = false;
@@ -435,7 +435,7 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 					float intensity = squareLight->getIntensity() / points.size();
 					for (int j = 0; j < points.size(); ++j)
 					{
-						color += computeShadow(points[j], normal, hitPos, intensity, material, r, squareLight->getGeometryId());
+						color += computeShadow(points[j], normal, hitPos, intensity, material, r, squareLight->getGeometryId(), squareLight->getColor());
 					}
 				}
 				else

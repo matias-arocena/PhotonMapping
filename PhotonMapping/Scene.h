@@ -61,6 +61,6 @@ private:
 
 	glm::vec3 trace(std::shared_ptr<Ray> ray, const int& depth, const float& currentRefract);
 	glm::vec3 shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> material, int depth, float currentRefract);
-	glm::vec3 computeShadow(const glm::vec3& lightPosition, const glm::vec3& normal, const glm::vec3& hitPos, const float& intensity, std::shared_ptr<Material> material, std::shared_ptr<Ray> r, const int& lightId);
+	glm::vec3 computeShadow(const glm::vec3& lightPosition, const glm::vec3& normal, const glm::vec3& hitPos, const float& intensity, std::shared_ptr<Material> material, std::shared_ptr<Ray> r, const int& lightId, glm::vec3 lightColor);
 };
 
