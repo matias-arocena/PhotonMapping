@@ -151,7 +151,7 @@ int main()
 
 	importScene();
 
-	std::srand(time(0));
+	std::srand(static_cast<int>(time(0)));
 	omp_set_nested(1);
 
 	while (isRunning)
