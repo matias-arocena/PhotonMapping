@@ -67,7 +67,7 @@ void Scene::attachModel(std::shared_ptr<Model> model)
 	std::vector<std::shared_ptr<Mesh>> modMeshes = model->getMeshes();
 	for ( std::shared_ptr<Mesh> mesh : modMeshes)
 	{
-		int id = meshes.size();
+		int id = static_cast<int>(meshes.size());
 		meshes.push_back(mesh);
 		rtcAttachGeometryByID(scene, mesh->getGeometry(), id);
         mesh->setGeometryId(id);
@@ -94,7 +94,7 @@ void Scene::addLight(std::shared_ptr<Light> light)
 	std::shared_ptr<SquareLight> squareLight = std::dynamic_pointer_cast<SquareLight>(light);
 	if (squareLight)
 	{
-		int id = meshes.size();
+		int id = static_cast<int>(meshes.size());
 		meshes.push_back(squareLight);
 		RTCDevice device = Device::getInstance().getDevice();
 		squareLight->createEmbreeMesh(device);
@@ -172,7 +172,7 @@ void Scene::generateGlobalPhotonMap()
 
 	for (int i = 0; i < lights.size(); ++i)
 	{
-		lights[i]->setPhotonQuantity((lights[i]->getIntensity() / globalIntensity) * Settings::globalPhotonQuantity);
+		lights[i]->setPhotonQuantity(static_cast<int>((lights[i]->getIntensity() / globalIntensity) * Settings::globalPhotonQuantity));
 		lights[i]->emitPhotons(photonMap, false);
 	}
 
@@ -200,7 +200,7 @@ void Scene::generateCausticPhotonMap()
 
 	for (int i = 0; i < lights.size(); ++i)
 	{
-		lights[i]->setPhotonQuantity((lights[i]->getIntensity() / globalIntensity) * Settings::causticPhotonQuantity);
+		lights[i]->setPhotonQuantity(static_cast<int>((lights[i]->getIntensity() / globalIntensity) * Settings::causticPhotonQuantity));
 		lights[i]->emitPhotons(photonMap, true);
 	}
 

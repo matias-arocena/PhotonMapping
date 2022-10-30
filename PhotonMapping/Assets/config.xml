@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<Scene resx="600" resy="600" maxDepth="10" bgColorR="0" bgColorG="0" bgColorB="0" fov="120" smoothness="4">
-    <Models>
+<Scene resx="2048" resy="2048" maxDepth="10" bgColorR="0" bgColorG="0" bgColorB="0" fov="120" smoothness="8">
+  <Models>
 		<Model posx="0" posy="0" posz="0" objRoute="Assets/caja.obj"/>
     </Models>
     <Lights>
-		<PointLight x="-.5" y="0" z="-.3" intensity="1" colorr="0" colorg="0" colorb="1"/>
+    <!--PointLight x="-.5" y="0" z="-.3" intensity="1" colorr="0" colorg="0" colorb="1"/-->
 		<!-- <PointLight x=".5" y="0" z="0" intensity="4" colorr="1" colorg="1" colorb="1"/> -->
 
 
@@ -14,8 +14,8 @@
 		 vx="0.5" vy="0" vz="0"
 		 intensity="2"
 		 colorr="1"
-		 colorg="0"
-		 colorb="0"
+		 colorg="1"
+		 colorb="1"
 		/>
 
 
