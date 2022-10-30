@@ -7,4 +7,4 @@ glm::vec3 Settings::backgroundColor = { 0, 0, 0 };
 int Settings::fov = 90;
 int Settings::smoothness = 8;
 int Settings::globalPhotonQuantity = 500000;
-int Settings::causticPhotonQuantity = 100000;
+int Settings::causticPhotonQuantity = 1000000;

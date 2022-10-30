@@ -6,6 +6,7 @@
 
 #include <memory>
 
+
 class Camera
 {
 
@@ -26,4 +27,5 @@ public:
 	SecreenBase screenBaseVectors();
 
 	std::vector<std::shared_ptr<Ray>> generateRaysCamera();
+	std::vector<std::vector<std::shared_ptr<Ray>>> generateRaysCameraWithAA();
 };

@@ -18,7 +18,11 @@ void Model::loadModel(const char* objFilePath)
 {
     Assimp::Importer import;
 
+#ifdef _DEBUG
     std::cout << objFilePath << std::endl;
+
+#endif // DEBUG
+
     const aiScene* scene = import.ReadFile(objFilePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_FixInfacingNormals);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)

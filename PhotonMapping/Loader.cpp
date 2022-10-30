@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include "Settings.h"
 #include "PointLight.h"
-#include "TriangleLight.h"
 #include "Camera.h"
 #include "SquareLight.h"
 
@@ -63,30 +62,6 @@ void importLights(pugi::xml_node node)
 			std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>(position, intensity, maximumEmittedPhotons, color);
 
 			Scene::getInstance().addLight(pointLight);
-		}
-
-		if (objType.compare("TriangleLight") == 0)
-		{
-			glm::vec3 p0{ 0,0,0 }, p1{ 0,0,0 }, p2{ 0,0,0 }, direction{ 0,0,0 }, color{0, 0, 0};
-			direction.x = obj.attribute("dirx").as_float();
-			direction.y = obj.attribute("diry").as_float();
-			direction.z = obj.attribute("dirz").as_float();
-
-			p0.x = obj.attribute("p0x").as_float();
-			p0.y = obj.attribute("p0y").as_float();
-			p0.z = obj.attribute("p0z").as_float();
-
-			p1.x = obj.attribute("p1x").as_float();
-			p1.y = obj.attribute("p1y").as_float();
-			p1.z = obj.attribute("p1z").as_float();
-
-			p2.x = obj.attribute("p2x").as_float();
-			p2.y = obj.attribute("p2y").as_float();
-			p2.z = obj.attribute("p2z").as_float();
-
-			std::shared_ptr<TriangleLight> triangleLight = std::make_shared<TriangleLight>(p0, p1, p2, direction, intensity, maximumEmittedPhotons, color);
-
-			Scene::getInstance().addLight(triangleLight);
 		}
 
 		if (objType.compare("SquareLight") == 0)
@@ -169,6 +144,7 @@ void importScene()
 	importModels(doc.child("Scene"));
 	importLights(doc.child("Scene"));
 	importCamera(doc.child("Scene"));
-
+#ifdef _DEBUG
 	std::cout << "Scene loaded" << std::endl;
+#endif
 }

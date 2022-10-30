@@ -47,7 +47,11 @@ void Scene::saveImage(std::vector<glm::vec3> buffer, std::string path)
 
     if (FreeImage_Save(FIF_PNG, bitmap, path.c_str(), 0))
     {
+#ifdef  _DEBUG
+
         std::cout << "Image " << path << " saved" << std::endl;
+#endif // _DEBUG
+
 	}
     FreeImage_DeInitialise();
 }
@@ -67,7 +71,10 @@ void Scene::attachModel(std::shared_ptr<Model> model)
 		meshes.push_back(mesh);
 		rtcAttachGeometryByID(scene, mesh->getGeometry(), id);
         mesh->setGeometryId(id);
+#ifdef _DEBUG
         std::cout << "Geometry id: " << id << std::endl;
+#endif // _DEBUG
+
 	}
 	
 }
@@ -93,8 +100,10 @@ void Scene::addLight(std::shared_ptr<Light> light)
 		squareLight->createEmbreeMesh(device);
 		rtcAttachGeometryByID(scene, squareLight->getGeometry(), id);
 		squareLight->setGeometryId(id);
-		
+#ifdef _DEBUG
 		std::cout << "Light Geometry id: " << id << std::endl;
+#endif // DEBUG
+
 	}
     lights.push_back(light);
 	commit();
@@ -201,17 +210,30 @@ void Scene::generateCausticPhotonMap()
 	caustic = photonMap;
 }
 
+void Scene::setCausticPhotonMap(std::shared_ptr<PhotonMap> photonMap)
+{
+	photonMap->build();
+	caustic = photonMap;
+}
+
 std::vector<glm::vec3> Scene::renderScene()
 {
 	std::vector<glm::vec3> buffer(Settings::width * Settings::height, glm::vec3{ 0,0,0 });
-	std::vector<std::shared_ptr<Ray>> camRays = camera->generateRaysCamera();
-	
-	#pragma omp parallel for
-    for (int i = 0; i < camRays.size(); ++i)
-	{
-        buffer[i] = colorToRgb(trace(camRays[i], Settings::maxDepth, 1.0f));
+	std::vector<std::vector<std::shared_ptr<Ray>>> camRays = camera->generateRaysCameraWithAA();
 
-    }
+
+#pragma omp parallel for
+	for (int i = 0; i < camRays.size(); ++i)
+	{
+		glm::vec3 color = Settings::backgroundColor;
+		for (int j = 0; j < 4; j++)
+		{
+			color += trace(camRays[i][j], Settings::maxDepth, 1.0f);
+		}
+		buffer[i] = colorToRgb(color / 4.f);
+
+	}
+
     return buffer;
 }
 
@@ -271,10 +293,7 @@ glm::vec3 Scene::trace(std::shared_ptr<Ray> ray, const int &depth, const float &
 	if (ray->getHit(HitCoordinates))
 	{
 		RTCRayHit* hit = ray->getRayHit();
-		if (hit->hit.geomID >= meshes.size())
-		{
-			std::cout << "se rompe" << std::endl;
-		}
+		
 		std::shared_ptr<Mesh> mesh = NULL;
 		std::shared_ptr<SquareLight> squareLight = NULL;
 

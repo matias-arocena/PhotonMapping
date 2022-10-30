@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<Scene resx="600" resy="600" maxDepth="10" bgColorR="0" bgColorG="0" bgColorB="0" fov="120" smoothness="20">
+<Scene resx="600" resy="600" maxDepth="10" bgColorR="0" bgColorG="0" bgColorB="0" fov="120" smoothness="4">
     <Models>
 		<Model posx="0" posy="0" posz="0" objRoute="Assets/caja.obj"/>
     </Models>

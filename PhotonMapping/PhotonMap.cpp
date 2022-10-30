@@ -77,7 +77,7 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
 
         auto material = mesh->getMaterial();
 
-        if (material->getOpacity() < 1.0f)
+        if (material->getOpacity() < 1.0f && isCausticMap)
         {
             // La normal se tiene que invertir cuando se esta adentro del objeto refractado
             // Esta solucion esta mal, funciona solo cuando el ior del material vidrio es distinto de 1
@@ -122,11 +122,10 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
             }
             else // Absorb
             {
+                
+                if (depth != 1)
                 {
-                    if (depth != 1)
-                    {
-                        photonMap->addPhoton(photon);
-                    }
+                    photonMap->addPhoton(photon);
                 }
                 return;
             }
@@ -204,13 +203,14 @@ std::vector<int> PhotonMap::queryKNearestPhotons(const glm::vec3& p, float radiu
 
 std::vector<glm::vec3> PhotonMap::getMapBuffer()
 {
-    std::vector<glm::vec3> buffer(Settings::width * Settings::height, glm::vec3{0,0,0});
 
     if (photons.size() == 0)
     {
         return std::vector<glm::vec3>(Settings::width * Settings::height, glm::vec3{0,0,0});
     }
     std::vector<std::shared_ptr<Ray>> camRays = Scene::getInstance().getCamera()->generateRaysCamera();
+
+    std::vector<glm::vec3> buffer(camRays.size(), glm::vec3{0,0,0});
 
     #pragma omp parallel for
     for (int i = 0; i < camRays.size(); ++i)

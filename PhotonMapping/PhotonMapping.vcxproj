@@ -178,7 +178,6 @@
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="SquareLight.cpp" />
     <ClCompile Include="ThirdParty\includes\pugixml\pugixml.cpp" />
-    <ClCompile Include="TriangleLight.cpp" />
     <ClCompile Include="Loader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -196,7 +195,6 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="SquareLight.h" />
-    <ClInclude Include="TriangleLight.h" />
     <ClInclude Include="Loader.h" />
   </ItemGroup>
   <ItemGroup>

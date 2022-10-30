@@ -40,6 +40,8 @@ public:
 
 	std::shared_ptr<PhotonMap> getCausticPhotonMap();
 	void generateCausticPhotonMap();
+	void setCausticPhotonMap(std::shared_ptr<PhotonMap> photonMap);
+
 
 	std::vector<glm::vec3> renderScene();
 
