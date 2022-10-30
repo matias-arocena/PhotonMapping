@@ -153,7 +153,7 @@ void KdTree::buildTree()
     std::iota(indices.begin(), indices.end(), 0);
 
     // build tree recursively
-    buildNode(indices.data(), points.size(), 0);
+    buildNode(indices.data(), static_cast<int>(points.size()), 0);
 }
 
 std::vector<int> KdTree::searchKNearest(const glm::vec3& queryPoint, int k, float& maxDist2) const

@@ -22,7 +22,7 @@ void generatePhotonMapping()
 {
 
 	importScene();
-	std::srand(time(0));
+	std::srand(static_cast<unsigned int>(time(0)));
 	omp_set_nested(1);
 
 	auto t1 = std::thread([] {
