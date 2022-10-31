@@ -459,7 +459,7 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 	if (material->getOpacity() == 1) {
 		// Photon map
 		float r2;
-		std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 500, r2);
+		std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 1500, r2);
 		glm::vec3 totalPower = Settings::backgroundColor;
 		if (photonIndices.size() > 0)
 		{
@@ -476,7 +476,7 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 		color += totalPower / area;
 
 		// Caustic Photon map
-		photonIndices = caustic->queryKNearestPhotons(hitPos, 500, r2);
+		photonIndices = caustic->queryKNearestPhotons(hitPos, 1500, r2);
 		totalPower = Settings::backgroundColor;
 		if (photonIndices.size() > 0)
 		{
