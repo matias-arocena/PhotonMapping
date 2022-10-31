@@ -85,12 +85,13 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
             glm::vec3 newDirection = { 0,0,0 };
             if (currentRefract != 1.f)
             {
-                newDirection = glm::refract(direction, -normal, currentRefract / material->getRefraction());
+                newDirection = glm::refract(direction, -normal, material->getRefraction());
             }
             else
             {
                 newDirection = glm::refract(direction, normal, currentRefract / material->getRefraction());
             }
+
             Photon::trace(photon->position + newDirection * 0.01f, newDirection, photon->power, depth + 1, material->getRefraction(), photonMap, isCausticMap);
 
         }
@@ -100,7 +101,7 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
             if (type == ReflectionType::Diffuse && !isCausticMap)
             {
 
-                if (depth != 1)
+                if (depth != 1 && material->getOpacity() != .0f)
                 {
                     photonMap->addPhoton(photon);
                 }
@@ -123,7 +124,7 @@ void Photon::trace(glm::vec3 origin, glm::vec3 direction, glm::vec3 power, int d
             else // Absorb
             {
                 
-                if (depth != 1)
+                if (depth != 1 && material->getOpacity() == 1.0f)
                 {
                     photonMap->addPhoton(photon);
                 }
@@ -222,7 +223,7 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer()
         if (camRays[i]->getHit(HitCoordinates))
         {
             float r2;
-            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 15, r2);
+            std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 500, r2);
             int photonIndex = photonIndices[0];
 
             glm::vec3 totalPower = Settings::backgroundColor;
@@ -240,20 +241,6 @@ std::vector<glm::vec3> PhotonMap::getMapBuffer()
             totalPower = totalPower / area;
             buffer[i] = glm::clamp(totalPower, {0,0,0}, {1,1,1}) * 255.f;
 
-            //float r2;
-            //std::vector<int> photonIndices = queryKNearestPhotons(HitCoordinates, 1, r2);
-
-            //int photonIndex = photonIndices[0];
-
-            //if (r2 < .00005f)
-            //{
-            //    std::shared_ptr<Photon> photon = photons[photonIndex];
-            //    buffer.push_back(photon->power * 255.f);
-            //}
-            //else
-            //{
-            //    buffer.push_back(glm::vec3{ 0,0,0 });
-            //}
         }
     }
     return buffer;

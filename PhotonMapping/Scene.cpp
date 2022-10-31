@@ -67,7 +67,7 @@ void Scene::attachModel(std::shared_ptr<Model> model)
 	std::vector<std::shared_ptr<Mesh>> modMeshes = model->getMeshes();
 	for ( std::shared_ptr<Mesh> mesh : modMeshes)
 	{
-		int id = meshes.size();
+		int id = static_cast<int>(meshes.size());
 		meshes.push_back(mesh);
 		rtcAttachGeometryByID(scene, mesh->getGeometry(), id);
         mesh->setGeometryId(id);
@@ -94,7 +94,7 @@ void Scene::addLight(std::shared_ptr<Light> light)
 	std::shared_ptr<SquareLight> squareLight = std::dynamic_pointer_cast<SquareLight>(light);
 	if (squareLight)
 	{
-		int id = meshes.size();
+		int id = static_cast<int>(meshes.size());
 		meshes.push_back(squareLight);
 		RTCDevice device = Device::getInstance().getDevice();
 		squareLight->createEmbreeMesh(device);
@@ -172,7 +172,7 @@ void Scene::generateGlobalPhotonMap()
 
 	for (int i = 0; i < lights.size(); ++i)
 	{
-		lights[i]->setPhotonQuantity((lights[i]->getIntensity() / globalIntensity) * Settings::globalPhotonQuantity);
+		lights[i]->setPhotonQuantity(static_cast<int>((lights[i]->getIntensity() / globalIntensity) * Settings::globalPhotonQuantity));
 		lights[i]->emitPhotons(photonMap, false);
 	}
 
@@ -200,7 +200,7 @@ void Scene::generateCausticPhotonMap()
 
 	for (int i = 0; i < lights.size(); ++i)
 	{
-		lights[i]->setPhotonQuantity((lights[i]->getIntensity() / globalIntensity) * Settings::causticPhotonQuantity);
+		lights[i]->setPhotonQuantity(static_cast<int>((lights[i]->getIntensity() / globalIntensity) * Settings::causticPhotonQuantity));
 		lights[i]->emitPhotons(photonMap, true);
 	}
 
@@ -258,6 +258,7 @@ float computeSquareLightIntensity(glm::vec3 L, const glm::vec3& normal, const fl
 
 	L = glm::normalize(L);
 	float dot = glm::dot(-L, light->getNormal());
+	dot = dot < 0.002 ?  0 : dot;
 
 	lightInt = glm::max(glm::dot(normal, L), 0.f) * dot * pointLigntInt / fatt; // pointLight->getIntensity(); // El dot product de 2 vectores normalizados da el coseno del angulo entre ellos, 50 es la intensidad
 
@@ -325,7 +326,7 @@ glm::vec3 Scene::computeShadow(const glm::vec3 &lightPosition, const glm::vec3 &
 	glm::vec3 color = Settings::backgroundColor;
 	glm::vec3 L = lightPosition - hitPos;
 
-	auto shadowRay = std::make_shared<Ray>(hitPos + (normal * 0.01f), glm::normalize(L)); // Ray from hit to light source
+	auto shadowRay = std::make_shared<Ray>(hitPos + (normal * 0.001f), glm::normalize(L)); // Ray from hit to light source
 
 	glm::vec3 shadowHitPos;
 	throwRay(shadowRay);
@@ -412,36 +413,14 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 			if (squareLight != NULL)
 			{
 
+				std::vector<glm::vec3> points = squareLight->getRandomPositions(Settings::smoothness);
 
-				std::vector<glm::vec3> corners = squareLight->getCorners();
-				bool finishShadow = false;
-				float intensity = squareLight->getIntensity() / corners.size();
-				glm::vec3 tempColor = Settings::backgroundColor;
-				for (int i = 0; i < corners.size() && finishShadow; i++)
+				float intensity = squareLight->getIntensity() / points.size();
+				for (int j = 0; j < points.size(); ++j)
 				{
-					glm::vec3 point = corners[i];
-					glm::vec3 cornerColor = computeShadow(point, normal, hitPos, intensity, material, r, squareLight->getGeometryId(), squareLight->getColor());
-					if (cornerColor == Settings::backgroundColor)
-					{
-						finishShadow = false;
-					}
-					tempColor += cornerColor;
+					color += computeShadow(points[j], normal, hitPos, intensity, material, r, squareLight->getGeometryId(), squareLight->getColor());
 				}
 
-				if (!finishShadow)
-				{
-					std::vector<glm::vec3> points = squareLight->getRandomPositions(Settings::smoothness);
-
-					float intensity = squareLight->getIntensity() / points.size();
-					for (int j = 0; j < points.size(); ++j)
-					{
-						color += computeShadow(points[j], normal, hitPos, intensity, material, r, squareLight->getGeometryId(), squareLight->getColor());
-					}
-				}
-				else
-				{
-					color += tempColor;
-				}
 			}
 
 		}
@@ -450,24 +429,24 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 	if (material->getOpacity() < 1) {
 
 		//glm::vec3 reflect = glm::reflect(r->direction, normal);
-
 		// La normal se tiene que invertir cuando se esta adentro del objeto refractado
 		// Esta solucion esta mal, funciona solo cuando el ior del material vidrio es distinto de 1
 		// Y tampoco toma en cuenta cuando dos objetos transparentes se chocan
 		glm::vec3 refract = { 0,0,0 };
 		if (currentRefract != 1)
 		{
-			refract = glm::refract(r->direction, -normal, currentRefract / material->getRefraction());
+			refract = glm::refract(r->direction, -normal, material->getRefraction());
 		}
 		else
 		{
 			refract = glm::refract(r->direction, normal, currentRefract / material->getRefraction());
 		}
-		
-		//auto reflectRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), reflect);
-		auto refractRay = std::make_shared<Ray>(hitPos + refract * 0.01f, refract);
 
-		//color += trace(reflectRay, depth - 1, material->getReflection());
+		//float kr = 0;
+		//fresnel(r->direction, normal, currentRefract / material->getRefraction(), kr);
+		//auto reflectRay = std::make_shared<Ray>(hitPos + (r->direction * -0.01f), reflect);
+		//color += trace(reflectRay, depth - 1, material->getReflection()) * kr;
+		auto refractRay = std::make_shared<Ray>(hitPos + refract * 0.01f, refract);
 		color += trace(refractRay, depth - 1, material->getRefraction());
 	}
 	else if (material->getReflection())
@@ -480,7 +459,7 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 	if (material->getOpacity() == 1) {
 		// Photon map
 		float r2;
-		std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 1000, r2);
+		std::vector<int> photonIndices = global->queryKNearestPhotons(hitPos, 500, r2);
 		glm::vec3 totalPower = Settings::backgroundColor;
 		if (photonIndices.size() > 0)
 		{
@@ -497,7 +476,7 @@ glm::vec3 Scene::shade(std::shared_ptr<Ray> r, std::shared_ptr<Material> materia
 		color += totalPower / area;
 
 		// Caustic Photon map
-		photonIndices = caustic->queryKNearestPhotons(hitPos, 10, r2);
+		photonIndices = caustic->queryKNearestPhotons(hitPos, 500, r2);
 		totalPower = Settings::backgroundColor;
 		if (photonIndices.size() > 0)
 		{

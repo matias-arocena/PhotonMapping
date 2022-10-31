@@ -21,10 +21,6 @@
 void generatePhotonMapping()
 {
 
-	importScene();
-	std::srand(time(0));
-	omp_set_nested(1);
-
 	auto t1 = std::thread([] {
 		Scene::getInstance().generateCausticPhotonMap();
 
@@ -82,11 +78,81 @@ void exportPhotonMap()
 	t2.join();
 }
 
+void modifyCamera()
+{
+	bool finish = false;
+	while (!finish)
+	{
+		std::shared_ptr<Camera> camera = Scene::getInstance().getCamera();
+		std::cout << "## Modificar Camara ##" << std::endl; 
+		std::cout << "1 - Modificar Posicion ("
+			<< camera->getPosition().x << ","
+			<< camera->getPosition().y << ","
+			<< camera->getPosition().z << "):" << std::endl;
+		std::cout << "2 - Modificar Direcccion ("
+			<< camera->getDirection().x << ","
+			<< camera->getDirection().y << ","
+			<< camera->getDirection().z << "):" << std::endl;
+		std::cout << "3 - Modificar Up ("
+			<< camera->getUp().x << ","
+			<< camera->getUp().y << ","
+			<< camera->getUp().z << "):" << std::endl;
+		std::cout << "0 - Terminar"
+			<< std::endl;
+		int opt;
+		std::cin >> opt;
+		switch (opt) {
+		case 0:
+			finish = true;
+			break;
+		case 1:
+			glm::vec3 newPos = camera->getPosition();
+			std::cout << "Ingrese posicion x:";
+			std::cin >> newPos.x;
+			std::cout << "Ingrese posicion y:";
+			std::cin >> newPos.y;
+			std::cout << "Ingrese posicion z:";
+			std::cin >> newPos.z;
+			camera->setPosition(newPos);
+			break;
+		case 2:
+			glm::vec3 newDir = camera->getPosition();
+			std::cout << "Ingrese direccion x:";
+			std::cin >> newDir.x;
+			std::cout << "Ingrese direccion y:";
+			std::cin >> newDir.y;
+			std::cout << "Ingrese direccion z:";
+			std::cin >> newDir.z;
+			camera->setDirection(newDir);
+			break;
+		case 3:
+			glm::vec3 newUp = camera->getPosition();
+			std::cout << "Ingrese up x:";
+			std::cin >> newUp.x;
+			std::cout << "Ingrese up y:";
+			std::cin >> newUp.y;
+			std::cout << "Ingrese up z:";
+			std::cin >> newUp.z;
+			camera->setUp(newUp);
+			break;
+		default:
+			std::cout << "Error: Opcion incorrecta." << std::endl;
+			break;
+		}
+
+	}
+}
+
 int main()
 {
 	bool generated = false;
 	bool isRunning = true;
 	std::chrono::steady_clock::time_point begin, end;
+
+	importScene();
+
+	std::srand(static_cast<int>(time(0)));
+	omp_set_nested(1);
 
 	while (isRunning)
 	{
@@ -96,6 +162,7 @@ int main()
 		std::cout << "3 - Generar Escena" << std::endl;
 		std::cout << "4 - Importar Photon Map" << std::endl;
 		std::cout << "5 - Exportar Photon Map" << std::endl;
+		std::cout << "6 - Modificar Camara" << std::endl;
 		std::cout << "0 - Salir" << std::endl;
 		int opt;
 		std::cin >> opt;
@@ -140,7 +207,7 @@ int main()
 
 			end = std::chrono::steady_clock::now();
 			std::cout << "RayTracing generado en " << std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count() << " ms" << std::endl;
-
+			generated = true;
 			break;
 		case 4: 
 			std::cout << "Importando Photon Map." << std::endl;
@@ -158,6 +225,9 @@ int main()
 
 			exportPhotonMap();
 			std::cout << "\rPhoton Map export.           " << std::endl;
+			break;
+		case 6:
+			modifyCamera();
 			break;
 		case 0:
 			isRunning = false;

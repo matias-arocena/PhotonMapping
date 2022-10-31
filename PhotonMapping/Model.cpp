@@ -21,7 +21,7 @@ void Model::loadModel(const char* objFilePath)
 #ifdef _DEBUG
     std::cout << objFilePath << std::endl;
 
-#endif // DEBUG
+#endif // _DEBUG
 
     const aiScene* scene = import.ReadFile(objFilePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_FixInfacingNormals);
 
@@ -77,7 +77,7 @@ std::shared_ptr<Mesh> Model::createMesh(aiMesh* mesh, const aiScene* scene)
     RTCError e3 = rtcGetDeviceError(Device::getInstance().getDevice());
 
 #pragma omp parallel for
-    for (int i = 0; i < mesh->mNumVertices; i++)
+    for (int i = 0; i < static_cast<int>(mesh->mNumVertices); i++)
     {
         // Vertex
         vertexBuffer[i * 3]     = mesh->mVertices[i].x + this->position.x;
@@ -88,7 +88,7 @@ std::shared_ptr<Mesh> Model::createMesh(aiMesh* mesh, const aiScene* scene)
 
 #pragma omp parallel for
     // Asumo que mesh siempre tiene triángulos
-    for (int i = 0; i < mesh->mNumFaces; i++)
+    for (int i = 0; i < static_cast<int>(mesh->mNumFaces); i++)
     {
         aiFace face = mesh->mFaces[i];
         indexBuffer[i * 3] = face.mIndices[0];

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Scene resx="600" resy="600" maxDepth="10" bgColorR="0" bgColorG="0" bgColorB="0" fov="120" smoothness="5">
+  <Models>
+		<Model posx="0" posy="0" posz="0" objRoute="Assets/Bugatti/bugatti.obj"/>
+    </Models>
+    <Lights>
+    <PointLight x="-12.5255" y="10" z="-5.20988" intensity="10" colorr="1" colorg="1" colorb="1"/>
+    <PointLight x="12.5255" y="10" z="5.20988" intensity="10" colorr="1" colorg="1" colorb="1"/>
+    <PointLight x="12.5255" y="10" z="-5.20988" intensity="10" colorr="1" colorg="1" colorb="1"/>
+    <PointLight x="-12.5255" y="10" z="5.20988" intensity="10" colorr="1" colorg="1" colorb="1"/>
+
+		<!-- <SquareLight
+		 cenx="0" ceny="0.90" cenz="-1"
+		 norx="0" nory="-1" norz="0"
+		 vx="0.5" vy="0" vz="0"
+		 intensity="2"
+		 colorr="1"
+		 colorg="1"
+		 colorb="1"
+		/> -->
+
+
+    </Lights>
+    <Camera x="23.1284" y="13.4744" z="3.69043" upx="0" upy="1" upz="0" dirx="-0.8559" diry="-0.49867" dirz="-0.136579"/>
+</Scene>
